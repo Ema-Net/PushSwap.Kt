@@ -1,0 +1,23 @@
+[build-system]
+requires = ["flit_core >= 3.12.0, <4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "PushSwap.py"
+version = "0.1.0"
+description = "A Push Swap implementation in Python"
+authors = [{ name="Emaryllis" }]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.flit.module]
+name = "pushswap"
+
+[project.scripts]
+pushswap = "pushswap.entry:cli"
+test_pushswap = "pushswap.entry:test_cli"
+
+[project.urls]
+Home = "https://github.com/Emaryllis/PushSwap.py"
