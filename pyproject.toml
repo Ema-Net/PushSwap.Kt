@@ -20,4 +20,8 @@ pushswap = "pushswap.entry:cli"
 test_pushswap = "pushswap.entry:test_cli"
 
 [project.urls]
-Home = "https://github.com/Emaryllis/PushSwap.py"
+Author = "https://github.com/Emaryllis"
+Repository = "https://github.com/Ema-Net/PushSwap.py"
+Changelog = "https://github.com/Ema-Net/PushSwap.py/releases"
+Issues = "https://github.com/Ema-Net/PushSwap.py/issues"
+Funding = "https://github.com/sponsors/Emaryllis"
