@@ -1,8 +1,8 @@
 import argparse
 import sys
 
-from pushswap.chunk.chunk_sort import chunk_sort_hybrid
-from pushswap.utils.parser import parse_ints
+from .chunk.chunk_sort import chunk_sort_hybrid
+from .utils.parser import parse_ints
 
 class PushSwap:
     @staticmethod
