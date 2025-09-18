@@ -1,15 +1,12 @@
-from collections import deque
 from time import sleep
-
-from .small_sort import explore_three, sort_three, sort_three_descending
-from ..dataclass.ChunkInfo import ChunkInfo
-from ..dataclass.Move import Move
-from ..dataclass.PriorityQueue import PriorityQueue
 from typing import Dict, List
-from .init_chunks import define_chunks_values
-from ..dataclass.Stack import Stack
-from ..dataclass.Heap import ImmutableHeap
-from ..utils.debug import iteration_info, sort_finish_info, stack_info
+
+from pushswap.dataclass.Heap import ImmutableHeap
+from pushswap.dataclass.Move import Move
+from pushswap.chunk.small_sort import explore_three, sort_three, sort_three_descending
+from pushswap.dataclass.Stack import Stack
+from pushswap.dataclass.PriorityQueue import PriorityQueue
+from pushswap.utils.debug import iteration_info, sort_finish_info, stack_info
 
 def small_sort_a(stack: Stack, open_set: PriorityQueue,
                  visited: List[int], visited_order: Dict[int, int],
@@ -59,34 +56,6 @@ def small_sort_shortcut(stack: Stack, open_set: PriorityQueue,
         return True
     return False
 
-def chunk_goal(goal_heap: ImmutableHeap, chunk: ChunkInfo) -> ImmutableHeap:
-    chunk_goal_heap = []
-    for num in goal_heap:
-        if chunk.min_value <= num <= chunk.max_value:
-            chunk_goal_heap.append(num)
-    return tuple(chunk_goal_heap)
-
-def chunk_sort_hybrid(numbers: List[int]) -> None:
-    chunks = define_chunks_values(numbers)
-    #list_chunks(chunks)
-    current_chunk: ChunkInfo = chunks[0]
-    stack = Stack(current_chunk, deque(numbers), deque(), [], 0)
-    goal_heap: ImmutableHeap = tuple(sorted(numbers))
-
-    if tuple(numbers) == goal_heap:
-        print("The stack is already sorted.")
-        return
-
-    if len(numbers) <= 3:
-        # Just mutate the original stack since we are done after this.
-        for move in sort_three(stack):
-            stack.apply(move)
-        print("Sequence of moves:", " ".join(str(move) for move in stack.move_path))
-        print("Final sorted stack:", list(stack.a))
-        return
-
-    a_star(stack, goal_heap)
-
 def compute_all_moves(stack: Stack, open_set: PriorityQueue) -> None:
     for move in Move:  # iterate over all possible Push Swap moves
         new_stack = stack.copy()
@@ -103,8 +72,12 @@ def compute_all_moves(stack: Stack, open_set: PriorityQueue) -> None:
         # Push into open set
         open_set.push(new_stack)
 
-def a_star(stack: Stack, goal_heap: ImmutableHeap) -> None:
-    open_set: PriorityQueue[Stack] = PriorityQueue()
+def push_and_sort(stack: Stack, goal_heap: ImmutableHeap) -> None:
+    """
+    Use A* algorithm to find the shortest sequence of moves to move numbers
+    from Stack A to Stack B, while partially sorting Stack B in the process.
+    """
+    open_set: PriorityQueue = PriorityQueue()
     open_set.push(stack)
     visited: List[int] = []
 

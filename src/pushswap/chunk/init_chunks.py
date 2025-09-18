@@ -1,7 +1,7 @@
 from typing import List, Tuple
 from ..dataclass.ChunkInfo import ChunkInfo
 
-MAX_CHUNK_SIZE = 2  # Maximum size of each chunk
+MAX_CHUNK_SIZE = 8  # Maximum size of each chunk
 
 def define_chunks_values(stack: List[int]) -> Tuple[ChunkInfo, ...]:
     """

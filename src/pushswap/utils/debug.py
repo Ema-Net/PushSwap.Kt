@@ -1,12 +1,10 @@
 import sys
 from typing import Tuple
-
 from ..dataclass import Stack
 from ..dataclass.ChunkInfo import ChunkInfo
 
 def list_chunk(chunk: ChunkInfo) -> None:
     print(f"Chunk: {chunk.min_value}-{chunk.max_value}({chunk.mid_value})", end="")
-
 
 def list_chunks(chunks: Tuple[ChunkInfo, ...]) -> None:
     print("Defined Chunks: [", end="")
@@ -16,7 +14,6 @@ def list_chunks(chunks: Tuple[ChunkInfo, ...]) -> None:
         print(", ", end="")
     list_chunk(chunks[no_of_chunks - 1])
     print("]")
-
 
 def iteration_info(iteration: int, stack: Stack):
     print("-" * 50)

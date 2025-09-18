@@ -4,7 +4,6 @@ from typing import List
 from .ChunkInfo import ChunkInfo
 from .Heap import Heap
 from .Move import Move
-from pushswap.chunk.heuristics import compute_chunk_heuristic
 
 @dataclass
 class Stack:
@@ -16,7 +15,8 @@ class Stack:
     heuristic: int = 0
 
     def __post_init__(self):
-        self.compute_chunk_heuristic()
+        pass
+        # self.compute_chunk_heuristic()
 
     def __eq__(self, other):
         if not isinstance(other, Stack):
@@ -93,6 +93,3 @@ class Stack:
         """Apply a list of Push Swap moves to the current stack."""
         for move in moves:
             self.apply(move)
-
-    def compute_chunk_heuristic(self) -> None:
-        self.heuristic = compute_chunk_heuristic(tuple(self.a), tuple(self.b), self.current_chunk)
