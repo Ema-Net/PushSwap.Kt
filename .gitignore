@@ -1,6 +1,16 @@
-.venv/
-dist/
-*.pyc
-test/*
-.idea/
-/test
+.gradle/
+build/
+en.subject.pdf
+
+### IntelliJ IDEA ###
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+.idea/copilot.*
+*.iws
+*.iml
+*.ipr
+
+### Kotlin ###
+.kotlin/
