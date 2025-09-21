@@ -9,11 +9,11 @@ import java.lang.Integer.min
 class ChunkSort(private val numList: List<Int>) {
 	val chunks: List<Chunk> = defineChunkValues()
 	val smallSort = SmallSort()
-	val stack = Stack(CircularBuffer(numList.size, numList), CircularBuffer(numList.size), chunks.first(), mutableListOf(), 0, 0)
+	val stack = Stack(CircularBuffer(numList.size, numList), CircularBuffer(numList.size), chunks.first(), mutableListOf())
 
 	fun chunkSort() {
 		if (numList == numList.sorted()) return
-		if (numList.size <= 3) return smallSort.sortThree(stack.a).forEach(::println)
+		if (numList.size <= 5) return smallSort.smallSort(stack).forEach(::println)
 	}
 
 	private fun defineChunkValues(): List<Chunk> {

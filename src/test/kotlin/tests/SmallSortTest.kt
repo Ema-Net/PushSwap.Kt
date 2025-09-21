@@ -3,7 +3,9 @@ package tests
 import Checker
 import Utils.showNewline
 import me.emaryllis.chunk.SmallSort
+import me.emaryllis.data.Chunk
 import me.emaryllis.data.CircularBuffer
+import me.emaryllis.data.Stack
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -18,15 +20,21 @@ open class SmallSortTest {
 
 	companion object {
 		@JvmStatic
-		fun smallSortTest(): Stream<Arguments> =
-			(1..3).flatMap { i ->
-				(1..3).flatMap { j ->
-					(1..3).map { k -> Arguments.of(listOf(i, j, k), "OK\n") }
+		fun smallSortTest(): Stream<Arguments> = listOf(3, 4, 5)
+			.flatMap { size -> (1..size).toList().permutations().toList() }
+			.map { Arguments.of(it, "OK\n") }
+			.stream()
+
+		// Extension function to generate all permutations of a list
+		private fun List<Int>.permutations(): Sequence<List<Int>> = sequence {
+			if (size <= 1) yield(this@permutations)
+			else {
+				indices.forEach { i ->
+					val rest = this@permutations.take(i) + this@permutations.drop(i + 1)
+					rest.permutations().forEach { yield(listOf(this@permutations[i]) + it) }
 				}
 			}
-				.filter { (it.get()[0] as List<*>).distinct().size == 3 }
-				.filter { it.get()[0] as List<*> != listOf(1, 2, 3) }
-				.stream()
+		}
 	}
 
 	@ParameterizedTest
@@ -36,7 +44,8 @@ open class SmallSortTest {
 		val originalOut = System.out
 		try {
 			System.setOut(PrintStream(outContent))
-			Checker(smallSort.sortThree(CircularBuffer(numList.size, numList)), numList, numList.sorted())
+			val stack = Stack(CircularBuffer(numList.size, numList), CircularBuffer(numList.size), Chunk(numList.min(), numList.max(), numList), mutableListOf())
+			Checker(smallSort.smallSort(stack), numList, numList.sorted())
 			val stdout = outContent.toString().replace("\r", "")
 			assertTrue(stdout.contains(expected), "Expected: '${expected.showNewline()}', but got: '${stdout.showNewline()}'")
 		} finally {

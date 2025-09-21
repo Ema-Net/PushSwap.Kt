@@ -10,7 +10,7 @@ import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import java.util.stream.Stream
 
-class ErrorTest {
+class InvalidIOTest {
 	companion object {
 		@JvmStatic
 		fun errorTest(): Stream<Arguments> = Stream.of(

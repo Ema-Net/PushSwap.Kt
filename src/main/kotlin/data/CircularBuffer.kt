@@ -21,7 +21,7 @@ class CircularBuffer(private val capacity: Int, numList: List<Int> = emptyList()
 	val isFull get() = size == capacity
 
 	/** Insert at logical tail */
-	fun enqueue(value: Int): Boolean {
+	private fun enqueue(value: Int): Boolean {
 		if (isFull) return false
 		buffer[(head + size) % capacity] = value
 		size++
@@ -29,8 +29,8 @@ class CircularBuffer(private val capacity: Int, numList: List<Int> = emptyList()
 	}
 
 	/** Remove from logical head */
-	fun dequeue(): Int? {
-		if (isEmpty) return null
+	private fun dequeue(): Int {
+		require(!isEmpty) { "Buffer is empty" }
 		val value = buffer[head]
 		buffer[head] = 0 // clear garbage
 		head = (head + 1) % capacity
@@ -49,8 +49,7 @@ class CircularBuffer(private val capacity: Int, numList: List<Int> = emptyList()
 	/** Rotates to the left */
 	fun rotate(): Boolean {
 		if (size <= 1) return false
-		val first = dequeue()!!
-		return enqueue(first)
+		return enqueue(dequeue())
 	}
 
 	/** Rotates both buffers to the left */
@@ -72,10 +71,9 @@ class CircularBuffer(private val capacity: Int, numList: List<Int> = emptyList()
 
 	fun push(dest: CircularBuffer): Boolean {
 		if (isEmpty || dest.isFull) return false
-		val value = dequeue()!!
 		// put into front of dest
 		dest.head = (dest.head - 1 + dest.capacity) % dest.capacity
-		dest.buffer[dest.head] = value
+		dest.buffer[dest.head] = dequeue()
 		dest.size++
 		return true
 	}

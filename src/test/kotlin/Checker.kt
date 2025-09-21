@@ -1,5 +1,7 @@
 import me.emaryllis.data.CircularBuffer
 import me.emaryllis.data.Move
+import java.util.logging.Logger
+import java.util.logging.Logger.GLOBAL_LOGGER_NAME
 
 class Checker(private val moves: List<Move>, numList: List<Int>, private val expectedNumList: List<Int>) {
 	private val a = CircularBuffer(numList.size, numList)
@@ -19,6 +21,7 @@ class Checker(private val moves: List<Move>, numList: List<Int>, private val exp
 	)
 
 	init {
+		Logger.getLogger(GLOBAL_LOGGER_NAME).info("Moves: $moves")
 		if (numList.isEmpty() || expectedNumList.isEmpty()) System.err.println("Error")
 		else if (moves.isEmpty() && numList == numList.sorted()) println("OK")
 		else if (moves.isEmpty()) System.err.println("Error")
@@ -28,12 +31,10 @@ class Checker(private val moves: List<Move>, numList: List<Int>, private val exp
 
 	private fun checker(): Boolean {
 		moves.forEach {
-//			println("Before: Buffer A: ${a.buffer.toList()}, Value A: ${a.value}, Buffer B: ${b.buffer.toList()}, Value B: ${b.value}")
 			if (opsMap[it]?.invoke() == null) {
 				System.err.println("Failed to invoke operation: $it")
 				return false
 			}
-//			println("After: Buffer A: ${a.buffer.toList()}, Value A: ${a.value}, Buffer B: ${b.buffer.toList()}, Value B: ${b.value}")
 		}
 		if (!b.isEmpty) {
 			System.err.println("Stack B is not empty. Size: ${b.size}")
