@@ -1,6 +1,7 @@
 package tests
 
 import Checker
+import Utils.permutations
 import Utils.showNewline
 import me.emaryllis.chunk.SmallSort
 import me.emaryllis.data.Chunk
@@ -24,37 +25,34 @@ open class SmallSortTest {
 			.flatMap { size -> (1..size).toList().permutations().toList() }
 			.map { Arguments.of(it, "OK\n") }
 			.stream()
-
-		// Extension function to generate all permutations of a list
-		private fun List<Int>.permutations(): Sequence<List<Int>> = sequence {
-			if (size <= 1) yield(this@permutations)
-			else {
-				indices.forEach { i ->
-					val rest = this@permutations.take(i) + this@permutations.drop(i + 1)
-					rest.permutations().forEach { yield(listOf(this@permutations[i]) + it) }
-				}
-			}
-		}
 	}
 
 	@ParameterizedTest
 	@MethodSource("smallSortTest")
-	fun verifyErrorTest(numList: List<Int>, expected: String = "OK\n") {
+	fun smallSortTest(numList: List<Int>, expected: String = "OK\n") {
 		val outContent = ByteArrayOutputStream()
+		val errContent = ByteArrayOutputStream()
 		val originalOut = System.out
+		val originalErr = System.err
 		try {
 			System.setOut(PrintStream(outContent))
 			val stack = Stack(CircularBuffer(numList.size, numList), CircularBuffer(numList.size), Chunk(numList.min(), numList.max(), numList), mutableListOf())
+			System.setErr(PrintStream(errContent))
 			Checker(smallSort.smallSort(stack), numList, numList.sorted())
+			assertTrue(errContent.toString().trim().isEmpty(), "Expected no error output, but got: '${errContent.toString().showNewline()}'")
 			val stdout = outContent.toString().replace("\r", "")
 			assertTrue(stdout.contains(expected), "Expected: '${expected.showNewline()}', but got: '${stdout.showNewline()}'")
 		} finally {
 			System.setOut(originalOut)
+			System.setErr(originalErr)
 		}
 	}
 
 	@Test
-	fun testAlreadySorted() {
-		verifyErrorTest(listOf(1, 2, 3), "")
+	fun noOutputTest() {
+		smallSortTest(emptyList(), "")
+		smallSortTest(listOf(1), "")
+		smallSortTest(listOf(1, 2), "")
+		smallSortTest(listOf(1, 2, 3), "")
 	}
 }
