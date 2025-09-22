@@ -1,5 +1,7 @@
 package me.emaryllis.data
 
+import me.emaryllis.Settings.HASH_PRIME
+
 class CircularBuffer(private val capacity: Int, numList: List<Int> = emptyList()) {
 	var buffer: IntArray = IntArray(capacity)
 	private var head = 0  // points to next element to read
@@ -20,28 +22,10 @@ class CircularBuffer(private val capacity: Int, numList: List<Int> = emptyList()
 	val isEmpty get() = size == 0
 	val isFull get() = size == capacity
 
-	/** Insert at logical tail */
-	private fun enqueue(value: Int): Boolean {
-		if (isFull) return false
-		buffer[(head + size) % capacity] = value
-		size++
-		return true
-	}
-
-	/** Remove from logical head */
-	private fun dequeue(): Int {
-		require(!isEmpty) { "Buffer is empty" }
-		val value = buffer[head]
-		buffer[head] = 0 // clear garbage
-		head = (head + 1) % capacity
-		size--
-		return value
-	}
-
 	fun swap(): Boolean {
 		if (size < 2) return false
-		val temp = this[0]
-		this[0] = this[1]
+		val temp = get(0)
+		this[0] = get(0)
 		this[1] = temp
 		return true
 	}
@@ -104,19 +88,43 @@ class CircularBuffer(private val capacity: Int, numList: List<Int> = emptyList()
 	override fun hashCode(): Int {
 		var result = size
 		for (i in 0 until size) {
-			result = 31 * result + buffer[(head + i) % capacity]
+			result = HASH_PRIME * result + get(i)
 		}
 		return result
 	}
+
+	fun contains(value: Int): Boolean = buffer.contains(value)
+
+	fun containsAll(values: Collection<Int>): Boolean = values.all { contains(it) }
 
 	operator fun get(i: Int): Int {
 		require(i in 0 until size) { "Index $i out of bounds (size=$size)" }
 		return buffer[(head + i) % capacity]
 	}
 
-	// For testing purposes - Purposely made it inconvenient to prevent accidental use
-	operator fun set(i: Int, value: Int) {
+	private operator fun set(i: Int, value: Int) = setIfYouNeedTo(i, value)
+
+	// For testing purposes
+	fun setIfYouNeedTo(i: Int, value: Int) {
 		require(i in 0 until size) { "Index $i out of bounds (size=$size)" }
 		buffer[(head + i) % capacity] = value
+	}
+
+	/** Insert at logical tail */
+	private fun enqueue(value: Int): Boolean {
+		if (isFull) return false
+		buffer[(head + size) % capacity] = value
+		size++
+		return true
+	}
+
+	/** Remove from logical head */
+	private fun dequeue(): Int {
+		require(!isEmpty) { "Buffer is empty" }
+		val value = buffer[head]
+		buffer[head] = 0 // clear garbage
+		head = (head + 1) % capacity
+		size--
+		return value
 	}
 }

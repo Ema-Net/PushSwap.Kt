@@ -1,20 +1,20 @@
 package me.emaryllis.data
 
 class PriorityQueue {
-	private val heap = mutableListOf<Pair<CircularBuffer, Int>>()
+	private val heap = mutableListOf<Stack>()
 
 	val size: Int get() = heap.size
 	val isEmpty: Boolean get() = heap.isEmpty()
 
-	fun peek(): Pair<CircularBuffer, Int>? = heap.firstOrNull()
+	fun peek(): Stack? = heap.firstOrNull()
 
-	fun push(element: Pair<CircularBuffer, Int>) {
+	fun push(element: Stack) {
 		heap.add(element)
 		siftUp(heap.lastIndex)
 	}
 
-	fun pop(): Pair<CircularBuffer, Int>? {
-		if (heap.isEmpty()) return null
+	fun pop(): Stack {
+		if (heap.isEmpty()) error("Stack is empty")
 		val top = heap.first()
 		val last = heap.removeAt(heap.lastIndex)
 		if (heap.isNotEmpty()) {
@@ -29,7 +29,7 @@ class PriorityQueue {
 		val value = heap[i]
 		while (i > 0) {
 			val parent = (i - 1) / 2
-			if (value.second >= heap[parent].second) break
+			if (value.heuristic >= heap[parent].heuristic) break
 			heap[i] = heap[parent]
 			i = parent
 		}
@@ -44,10 +44,10 @@ class PriorityQueue {
 			val left = 2 * i + 1
 			val right = 2 * i + 2
 			var smallestChild = left
-			if (right < n && heap[right].second < heap[left].second) {
+			if (right < n && heap[right].heuristic < heap[left].heuristic) {
 				smallestChild = right
 			}
-			if (heap[smallestChild].second >= value.second) break
+			if (heap[smallestChild].heuristic >= value.heuristic) break
 			heap[i] = heap[smallestChild]
 			i = smallestChild
 		}
