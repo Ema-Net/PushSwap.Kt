@@ -36,8 +36,8 @@ open class SmallSortTest {
 		val originalErr = System.err
 		try {
 			System.setOut(PrintStream(outContent))
-			val stack = Stack(CircularBuffer(numList.size, numList), CircularBuffer(numList.size), Chunk(numList.min(), numList.max(), numList), mutableListOf())
 			System.setErr(PrintStream(errContent))
+			val stack = Stack(CircularBuffer(numList.size, numList), CircularBuffer(numList.size), Pair(Chunk(0, 0, emptyList()), null), mutableListOf())
 			Checker(smallSort.smallSort(stack), numList, numList.sorted())
 			assertTrue(errContent.toString().trim().isEmpty(), "Expected no error output, but got: '${errContent.toString().showNewline()}'")
 			val stdout = outContent.toString().replace("\r", "")

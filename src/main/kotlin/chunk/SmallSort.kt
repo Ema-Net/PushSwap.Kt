@@ -16,7 +16,7 @@ class SmallSort {
 		}
 	}
 
-	fun sortThree(buffer: CircularBuffer): List<Move> {
+	private fun sortThree(buffer: CircularBuffer): List<Move> {
 		if (buffer == buffer.sorted() || buffer.size < 2) return emptyList()
 		if (buffer.size == 2) {
 			if (buffer[0] > buffer[1]) return listOf(Move.SA)
@@ -41,7 +41,7 @@ class SmallSort {
 	 * Sorts a stack of four or five elements by pushing the smallest one or two to stack B.
 	 * Computes 1-2 moves more than A*, but at a reduced time complexity.
 	 */
-	fun sortFourFive(stack: Stack): List<Move> {
+	private fun sortFourFive(stack: Stack): List<Move> {
 		val numToPush = if (stack.a.size == 5) 2 else 1
 
 		repeat(numToPush) {

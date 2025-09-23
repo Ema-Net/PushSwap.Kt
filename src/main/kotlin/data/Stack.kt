@@ -3,18 +3,20 @@ package me.emaryllis.data
 import me.emaryllis.Settings.HASH_PRIME
 
 class Stack(
-	val a: CircularBuffer, val b: CircularBuffer,
-	var chunk: Chunk, private val moveList: MutableList<Move>
+	val a: CircularBuffer,
+	val b: CircularBuffer,
+	var chunk: Pair<Chunk, Chunk?>, // Pair(currentChunk, nextChunk)
+	private val moveList: MutableList<Move>,
+	var heuristic: Int = Int.MAX_VALUE
 ) {
 	var moves: MutableList<Move> = moveList
 		get() = moveList
 		private set
-	var currentCost = moveList.size
-		get() = moveList.size
+	var currentCost = heuristic
+		get() = moveList.size + heuristic
 		private set
-	var heuristic: Int = Int.MAX_VALUE
 
-	fun clone(): Stack = Stack(a.clone(), b.clone(), chunk.clone(), moveList.toMutableList())
+	fun clone(): Stack = Stack(a.clone(), b.clone(), Pair(chunk.first.clone(), chunk.second?.clone()), moveList.toMutableList(), heuristic)
 
 	fun apply(move: Move): Boolean {
 		val status = when (move) {
@@ -53,7 +55,7 @@ class Stack(
 
 	override fun hashCode(): Int {
 		var result = a.hashCode()
-		listOf(b.hashCode(), chunk.hashCode(), heuristic).forEach {
+		listOf(b.hashCode(), chunk.first.hashCode(), chunk.second?.hashCode() ?: 0, heuristic).forEach {
 			result = HASH_PRIME * result + it
 		}
 		return result

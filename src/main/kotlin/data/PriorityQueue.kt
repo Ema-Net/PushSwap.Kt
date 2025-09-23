@@ -4,9 +4,9 @@ class PriorityQueue {
 	private val heap = mutableListOf<Stack>()
 
 	val size: Int get() = heap.size
-	val isEmpty: Boolean get() = heap.isEmpty()
+	fun isNotEmpty(): Boolean = heap.isNotEmpty()
 
-	fun peek(): Stack? = heap.firstOrNull()
+	fun peek(): Stack = heap.first()
 
 	fun push(element: Stack) {
 		heap.add(element)
@@ -24,12 +24,16 @@ class PriorityQueue {
 		return top
 	}
 
+	fun retainAll(predicate: (Stack) -> Boolean) {
+		heap.retainAll(predicate)
+	}
+
 	private fun siftUp(index: Int) {
 		var i = index
 		val value = heap[i]
 		while (i > 0) {
 			val parent = (i - 1) / 2
-			if (value.heuristic >= heap[parent].heuristic) break
+			if (value.currentCost >= heap[parent].currentCost) break
 			heap[i] = heap[parent]
 			i = parent
 		}
@@ -44,10 +48,10 @@ class PriorityQueue {
 			val left = 2 * i + 1
 			val right = 2 * i + 2
 			var smallestChild = left
-			if (right < n && heap[right].heuristic < heap[left].heuristic) {
+			if (right < n && heap[right].currentCost < heap[left].currentCost) {
 				smallestChild = right
 			}
-			if (heap[smallestChild].heuristic >= value.heuristic) break
+			if (heap[smallestChild].currentCost >= value.currentCost) break
 			heap[i] = heap[smallestChild]
 			i = smallestChild
 		}

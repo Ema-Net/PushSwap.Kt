@@ -33,13 +33,13 @@ class Checker(private val moves: List<Move>, numList: List<Int>, private val exp
 				return false
 			}
 		}
-		if (!b.isEmpty) {
+		if (!b.isEmpty()) {
 			System.err.println("Stack B is not empty. Size: ${b.size}")
 			return false
 		}
 		val status = a.value.toList() == expectedNumList
 		if (!status) {
-			System.err.println("Expected: $expectedNumList, Got: ${a.value.toList()}")
+			System.err.println("Expected: $expectedNumList, Got: ${a.value.toList()}.")
 		}
 		return status
 	}

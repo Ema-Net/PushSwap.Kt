@@ -2,10 +2,10 @@ package me.emaryllis.data
 
 import me.emaryllis.Settings.HASH_PRIME
 
-class CircularBuffer(private val capacity: Int, numList: List<Int> = emptyList()) {
+class CircularBuffer(val capacity: Int, numList: List<Int> = emptyList()) : Collection<Int> {
 	var buffer: IntArray = IntArray(capacity)
 	private var head = 0  // points to next element to read
-	var size = 0
+	override var size = 0
 		private set
 
 	init {
@@ -19,18 +19,15 @@ class CircularBuffer(private val capacity: Int, numList: List<Int> = emptyList()
 		}
 	}
 
-	val isEmpty get() = size == 0
-	val isFull get() = size == capacity
-
 	fun swap(): Boolean {
 		if (size < 2) return false
 		val temp = get(0)
-		this[0] = get(0)
+		this[0] = get(1)
 		this[1] = temp
 		return true
 	}
 
-	/** Rotates to the left */
+	/** Rotates to the left (Decreases indices for most elements)*/
 	fun rotate(): Boolean {
 		if (size <= 1) return false
 		return enqueue(dequeue())
@@ -39,7 +36,7 @@ class CircularBuffer(private val capacity: Int, numList: List<Int> = emptyList()
 	/** Rotates both buffers to the left */
 	fun rotateBoth(other: CircularBuffer): Boolean = this.rotate() && other.rotate()
 
-	/** Rotates to the right */
+	/** Rotates to the right (Increases indices for most elements)*/
 	fun reverseRotate(): Boolean {
 		if (size <= 1) return false
 		val lastIndex = (head + size - 1 + capacity) % capacity
@@ -54,7 +51,7 @@ class CircularBuffer(private val capacity: Int, numList: List<Int> = emptyList()
 	fun reverseRotateBoth(other: CircularBuffer): Boolean = this.reverseRotate() && other.reverseRotate()
 
 	fun push(dest: CircularBuffer): Boolean {
-		if (isEmpty || dest.isFull) return false
+		if (isEmpty() || dest.isFull()) return false
 		// put into front of dest
 		dest.head = (dest.head - 1 + dest.capacity) % dest.capacity
 		dest.buffer[dest.head] = dequeue()
@@ -70,11 +67,12 @@ class CircularBuffer(private val capacity: Int, numList: List<Int> = emptyList()
 		return copy
 	}
 
-	fun peek(): Int? = if (isEmpty) null else buffer[head]
+	fun peek(): Int? = if (isEmpty()) null else buffer[head]
 
 	val value: List<Int>
 		get() = List(size) { get(it) }
 
+	// Overrides for equality and hashing
 	override fun equals(other: Any?): Boolean {
 		if (this === other) return true
 		if (other !is CircularBuffer) return false
@@ -87,18 +85,28 @@ class CircularBuffer(private val capacity: Int, numList: List<Int> = emptyList()
 
 	override fun hashCode(): Int {
 		var result = size
-		for (i in 0 until size) {
+		for (i in indices) {
 			result = HASH_PRIME * result + get(i)
 		}
 		return result
 	}
 
-	fun contains(value: Int): Boolean = buffer.contains(value)
+	// Overrides for Collection interface
 
-	fun containsAll(values: Collection<Int>): Boolean = values.all { contains(it) }
+	@Suppress("ReplaceSizeZeroCheckWithIsEmpty")
+	override fun isEmpty(): Boolean = size == 0 // NOSONAR: Replacing with 'isEmpty' causes inf recursion loop
 
+	fun isFull(): Boolean = size == capacity
+
+	override fun iterator(): Iterator<Int> = value.iterator() // NOSONAR: Can't use 'by' since list size is dynamic
+
+	override fun contains(element: Int): Boolean = value.contains(element)
+
+	override fun containsAll(elements: Collection<Int>): Boolean = elements.all { contains(it) }
+
+	// Overrides for array-like access
 	operator fun get(i: Int): Int {
-		require(i in 0 until size) { "Index $i out of bounds (size=$size)" }
+		require(i in indices) { "Index $i out of bounds (size=$size)" }
 		return buffer[(head + i) % capacity]
 	}
 
@@ -106,13 +114,13 @@ class CircularBuffer(private val capacity: Int, numList: List<Int> = emptyList()
 
 	// For testing purposes
 	fun setIfYouNeedTo(i: Int, value: Int) {
-		require(i in 0 until size) { "Index $i out of bounds (size=$size)" }
+		require(i in indices) { "Index $i out of bounds (size=$size)" }
 		buffer[(head + i) % capacity] = value
 	}
 
 	/** Insert at logical tail */
 	private fun enqueue(value: Int): Boolean {
-		if (isFull) return false
+		if (isFull()) return false
 		buffer[(head + size) % capacity] = value
 		size++
 		return true
@@ -120,7 +128,7 @@ class CircularBuffer(private val capacity: Int, numList: List<Int> = emptyList()
 
 	/** Remove from logical head */
 	private fun dequeue(): Int {
-		require(!isEmpty) { "Buffer is empty" }
+		require(isNotEmpty()) { "Buffer is empty" }
 		val value = buffer[head]
 		buffer[head] = 0 // clear garbage
 		head = (head + 1) % capacity
