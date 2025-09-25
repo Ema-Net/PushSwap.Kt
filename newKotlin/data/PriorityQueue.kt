@@ -3,7 +3,6 @@ package me.emaryllis.data
 class PriorityQueue {
 	private val heap = mutableListOf<Stack>()
 
-	val value: List<Stack> get() = heap.toList()
 	val size: Int get() = heap.size
 	fun isNotEmpty(): Boolean = heap.isNotEmpty()
 

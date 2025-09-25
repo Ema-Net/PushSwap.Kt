@@ -1,7 +1,9 @@
 package tests
 
 import Checker
+import Settings.DEBUG
 import Utils.permutations
+import Utils.suppressAllOutput
 import me.emaryllis.chunk.SmallSort
 import me.emaryllis.data.Chunk
 import me.emaryllis.data.CircularBuffer
@@ -13,7 +15,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
 
-open class SmallSortTest {
+class SmallSortTest {
 	private val smallSort = SmallSort()
 
 	companion object {
@@ -24,16 +26,22 @@ open class SmallSortTest {
 			.stream()
 	}
 
-	@ParameterizedTest
-	@MethodSource("smallSortTest")
-	fun smallSortTest(numList: List<Int>) {
+	private fun check(numList: List<Int>) {
 		val stack = Stack(
 			CircularBuffer(numList.size, numList),
 			CircularBuffer(numList.size),
-			Pair(Chunk(0, 0, emptyList()), null),
+			Chunk(0, 0, emptyList()),
+			null,
 			mutableListOf()
 		)
 		assertTrue(Checker(smallSort.smallSort(stack), numList, numList.sorted()).boolOutput())
+	}
+
+	@ParameterizedTest
+	@MethodSource("smallSortTest")
+	fun smallSortTest(numList: List<Int>) {
+		if (DEBUG) return check(numList)
+		suppressAllOutput(::check, numList)
 	}
 
 	@Test

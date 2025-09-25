@@ -28,10 +28,13 @@ class ChunkSort {
 		if (numList.size <= 5) return SmallSort().smallSort(stack)
 		var i = 0
 		while (chunks.size > i) {
-			if (i > 0) {
+			if (i == 0) {
+				stack.chunk = chunks[0]
+				stack.prevChunkNum = null
+			} else {
+				stack.chunk = chunks[i]
 				stack.prevChunkNum = chunks[i - 1].maxValue
 			}
-			stack.chunk = chunks[i]
 			println("Sorting chunk ${chunks[i].minValue} - ${chunks[i].maxValue}, ${getStackInfo(stack, false)}")
 			oldStack = stack.clone() // Debug
 			stack = aStar.sort(stack)

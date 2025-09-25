@@ -29,7 +29,7 @@ class CircularBuffer(val capacity: Int, numList: List<Int> = emptyList()) : Coll
 
 	/** Rotates to the left (Decreases indices for most elements)*/
 	fun rotate(): Boolean {
-		if (size < 2) return false
+		if (size <= 1) return false
 		return enqueue(dequeue())
 	}
 
@@ -38,7 +38,7 @@ class CircularBuffer(val capacity: Int, numList: List<Int> = emptyList()) : Coll
 
 	/** Rotates to the right (Increases indices for most elements)*/
 	fun reverseRotate(): Boolean {
-		if (size < 2) return false
+		if (size <= 1) return false
 		val lastIndex = (head + size - 1 + capacity) % capacity
 		val last = buffer[lastIndex]
 		buffer[lastIndex] = 0
@@ -51,7 +51,10 @@ class CircularBuffer(val capacity: Int, numList: List<Int> = emptyList()) : Coll
 	fun reverseRotateBoth(other: CircularBuffer): Boolean = this.reverseRotate() && other.reverseRotate()
 
 	fun push(dest: CircularBuffer): Boolean {
-		if (isEmpty() || dest.isFull()) return false
+		if (isEmpty() || dest.isFull()) {
+			System.err.println("Empty circular buffer")
+			return false
+		}
 		// put into front of dest
 		dest.head = (dest.head - 1 + dest.capacity) % dest.capacity
 		dest.buffer[dest.head] = dequeue()

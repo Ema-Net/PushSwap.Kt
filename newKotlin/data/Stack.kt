@@ -26,37 +26,33 @@ class Stack(
 		heuristic
 	)
 
-	/**
-	 * Had to use stupid hacky way of assigning temp variables for moves that affect both stacks
-	 * to prevent compiler from not executing both functions when the first returns false.
-	 */
 	fun apply(move: Move, log: Boolean = true): Boolean {
-		val temp1: Boolean
-		val temp2: Boolean
+		// Debug
+		if (move in listOf(Move.SS, Move.RR, Move.RRR) && (a.size <= 1 || b.size <= 1)) {
+			if (log) System.err.println("Invalid move: $move. Sizes are too small. Size A: ${a.size}, Size B: ${b.size}")
+			return false
+		}
+		if (move in listOf(Move.SA, Move.RA, Move.RRA) && a.size <= 1) {
+			if (log) System.err.println("Invalid move: $move. Size A is too small. Size A: ${a.size}")
+			return false
+		}
+		if (move in listOf(Move.SB, Move.RB, Move.RRB) && b.size <= 1) {
+			if (log) System.err.println("Invalid move: $move. Size B is too small. Size B: ${b.size}")
+			return false
+		}
+		///
 		val status = when (move) {
 			Move.SA -> a.swap()
 			Move.SB -> b.swap()
-			Move.SS -> {
-				temp1 = a.swap()
-				temp2 = b.swap()
-				temp1 && temp2
-			}
+			Move.SS -> a.swap() && b.swap()
 			Move.PA -> b.push(a)
 			Move.PB -> a.push(b)
 			Move.RA -> a.rotate()
 			Move.RB -> b.rotate()
-			Move.RR -> {
-				temp1 = a.rotate()
-				temp2 = b.rotate()
-				temp1 && temp2
-			}
+			Move.RR -> a.rotate() && b.rotate()
 			Move.RRA -> a.reverseRotate()
 			Move.RRB -> b.reverseRotate()
-			Move.RRR -> {
-				temp1 = a.reverseRotate()
-				temp2 = b.reverseRotate()
-				temp1 && temp2
-			}
+			Move.RRR -> a.reverseRotate() && b.reverseRotate()
 		}
 		if (status) moves.add(move)
 		else if (log) System.err.println("Invalid move: $move.")
@@ -71,7 +67,7 @@ class Stack(
 
 	override fun hashCode(): Int {
 		var result = a.hashCode()
-		listOf(b.hashCode(), chunk.hashCode(), heuristic).forEach {
+		listOf(b.hashCode(), chunk.hashCode(), prevChunkNum ?: 0, heuristic).forEach {
 			result = HASH_PRIME * result + it
 		}
 		return result
