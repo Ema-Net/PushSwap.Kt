@@ -1,7 +1,7 @@
 import me.emaryllis.data.CircularBuffer
 import me.emaryllis.data.Move
 
-class Checker(private val moves: List<Move>, numList: List<Int>, private val expectedNumList: List<Int>) {
+class Checker(private val moves: List<Move>, private val numList: List<Int>, private val expectedNumList: List<Int>) {
 	private val a = CircularBuffer(numList.size, numList)
 	private val b = CircularBuffer(numList.size)
 	private val opsMap = mapOf(
@@ -17,14 +17,6 @@ class Checker(private val moves: List<Move>, numList: List<Int>, private val exp
 		Move.RRB to { b.reverseRotate() },
 		Move.RRR to { a.reverseRotateBoth(b) }
 	)
-
-	init {
-		if (moves.isEmpty()) {
-			if (numList.isEmpty() || numList == numList.sorted()) println("OK")
-			else System.err.println("Error")
-		} else if (!checker()) println("KO")
-		else println("OK")
-	}
 
 	private fun checker(): Boolean {
 		moves.forEach {
@@ -42,5 +34,20 @@ class Checker(private val moves: List<Move>, numList: List<Int>, private val exp
 			System.err.println("Expected: $expectedNumList, Got: ${a.value.toList()}.")
 		}
 		return status
+	}
+
+	fun boolOutput(): Boolean {
+		return if (moves.isEmpty()) {
+			numList.isEmpty() || numList == numList.sorted()
+		} else if (!checker()) false
+		else true
+	}
+
+	fun output() {
+		if (moves.isEmpty()) {
+			if (numList.isEmpty() || numList == numList.sorted()) println("OK")
+			else System.err.println("Error")
+		} else if (!checker()) println("KO")
+		else println("OK")
 	}
 }
