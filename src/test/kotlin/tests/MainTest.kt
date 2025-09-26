@@ -16,11 +16,20 @@ class MainTest {
 
 	companion object {
 		@JvmStatic
-		fun smallSortTest(): Stream<Arguments> = listOf(6)
-			.flatMap { size -> (1..size).toList().permutations().toList() }
-			.map { Arguments.of(it) }
-//			.subList(1, 2)
-			.stream()
+		fun failedTests(): Stream<Arguments> = allPermutations(
+			listOf(121, 127, 145, 151, 169, 175, 241, 247,
+					25, 265, 271, 289, 290, 295, 296, 31, 361,
+					367, 368, 385, 386, 391, 392, 409, 410, 415, 416, 49, 55, 7))
+
+		@JvmStatic
+		fun allTests(): Stream<Arguments> = allPermutations()
+
+		private fun allPermutations(tests: List<Int> = emptyList()): Stream<Arguments> {
+			val permutations = listOf(6)
+				.flatMap { size -> (1..size).toList().permutations().toList() }
+			if (tests.isEmpty()) return permutations.map { Arguments.of(it) }.stream()
+			return tests.map { Arguments.of(permutations[it - 1]) }.stream()
+		}
 	}
 
 	private fun check(numList: List<Int>): Pair<Boolean, List<Move>> {
@@ -30,10 +39,15 @@ class MainTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("smallSortTest")
-	fun verifyErrorTest(numList: List<Int>) {
+	@MethodSource("allTests")
+	fun runAll(numList: List<Int>) {
 		if (DEBUG) return check(numList) as Unit
 		val moves = suppressAllOutput(::check, numList).second
 		println("Solved $numList in ${moves.size} moves: $moves.")
 	}
+
+	@ParameterizedTest
+	@MethodSource("failedTests")
+	fun runFailed(numList: List<Int>) = runAll(numList)
+
 }
