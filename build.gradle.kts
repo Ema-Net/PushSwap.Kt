@@ -1,3 +1,8 @@
+import groovyjarjarantlr.build.ANTLR.jarName
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
 	kotlin("jvm") version "2.1.10"
 	application
@@ -19,9 +24,25 @@ dependencies {
 	testImplementation("org.junit.platform:junit-platform-suite-api:${project.property("junit_version")}")
 	testRuntimeOnly("org.junit.platform:junit-platform-suite-engine:${project.property("junit_version")}")
 }
+tasks {
+	named<JavaCompile>("compileJava") { enabled = false }
+	named<JavaCompile>("compileTestJava") { enabled = false }
 
-tasks.test {
-	useJUnitPlatform()
+	build {
+		outputs.cacheIf { true }
+		inputs.files(fileTree(sourceSets.main.get().allSource))
+	}
+
+	test {
+		outputs.cacheIf { false }
+		exclude("**/*Suite*")
+		useJUnitPlatform()
+		testLogging {
+			events("skipped", "failed", "standardOut", "standardError")
+			exceptionFormat = TestExceptionFormat.FULL
+			showStandardStreams = true
+		}
+	}
 }
 kotlin {
 	jvmToolchain(21)

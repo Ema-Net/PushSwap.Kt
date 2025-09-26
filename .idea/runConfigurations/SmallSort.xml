@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="SmallSort" type="JUnit" factoryName="JUnit">
+    <module name="PushSwap.test" />
+    <option name="PACKAGE_NAME" value="tests" />
+    <option name="MAIN_CLASS_NAME" value="tests.SmallSortTest" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="class" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
