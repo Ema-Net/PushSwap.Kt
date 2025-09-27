@@ -13,6 +13,19 @@ object Utils {
 		}
 	}
 
+	fun List<Int>.nthPermutation(n: Int): List<Int> {
+		val items = this.toMutableList()
+		var k = n
+		val result = mutableListOf<Int>()
+		for (i in items.size downTo 1) {
+			val f = (1 until i).fold(1) { acc, v -> acc * v }
+			val idx = k / f
+			result.add(items.removeAt(idx))
+			k %= f
+		}
+		return result.toList()
+	}
+
 	fun <T, R> suppressAllOutput(assertFunc: (T) -> (R), assertParam: T): R {
 		val outContent = ByteArrayOutputStream()
 		val errContent = ByteArrayOutputStream()

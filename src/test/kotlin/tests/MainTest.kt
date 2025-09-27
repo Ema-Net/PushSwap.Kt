@@ -2,6 +2,7 @@ package tests
 
 import Checker
 import Settings.DEBUG
+import Utils.nthPermutation
 import Utils.permutations
 import Utils.suppressAllOutput
 import me.emaryllis.chunk.ChunkSort
@@ -10,6 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
+import kotlin.streams.asStream
 
 class MainTest {
 	private val chunkSort = ChunkSort()
@@ -25,11 +27,15 @@ class MainTest {
 		fun allTests(): Stream<Arguments> = allPermutations()
 
 		private fun allPermutations(tests: List<Int> = emptyList()): Stream<Arguments> {
-			val permutations = listOf(7)
-				.flatMap { size -> (1..size).toList().permutations().toList() }
-			if (tests.isEmpty()) return permutations.map { Arguments.of(it) }.stream()
-			return tests.map { Arguments.of(permutations[it - 1]) }.subList(0, 300).stream()
+			val size = 7
+			val baseList = (1..size).toList()
+			return if (tests.isEmpty()) {
+				baseList.permutations().map { Arguments.of(it) }.asStream()
+			} else {
+				tests.map { idx -> Arguments.of(baseList.nthPermutation(idx - 1)) }.stream()
+			}
 		}
+
 	}
 
 	private fun check(numList: List<Int>): Pair<Boolean, List<Move>> {
