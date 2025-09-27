@@ -25,10 +25,10 @@ class MainTest {
 		fun allTests(): Stream<Arguments> = allPermutations()
 
 		private fun allPermutations(tests: List<Int> = emptyList()): Stream<Arguments> {
-			val permutations = listOf(6)
+			val permutations = listOf(7)
 				.flatMap { size -> (1..size).toList().permutations().toList() }
 			if (tests.isEmpty()) return permutations.map { Arguments.of(it) }.stream()
-			return tests.map { Arguments.of(permutations[it - 1]) }.stream()
+			return tests.map { Arguments.of(permutations[it - 1]) }.subList(0, 300).stream()
 		}
 	}
 
@@ -41,7 +41,10 @@ class MainTest {
 	@ParameterizedTest
 	@MethodSource("allTests")
 	fun runAll(numList: List<Int>) {
-		if (DEBUG) return check(numList) as Unit
+		if (DEBUG) {
+			check(numList)
+			return
+		}
 		val moves = suppressAllOutput(::check, numList).second
 		println("Solved $numList in ${moves.size} moves: $moves.")
 	}
@@ -49,5 +52,4 @@ class MainTest {
 	@ParameterizedTest
 	@MethodSource("failedTests")
 	fun runFailed(numList: List<Int>) = runAll(numList)
-
 }

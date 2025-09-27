@@ -32,7 +32,7 @@ class AStar {
 	}
 
 	private fun aStar(stack: Stack, allowedMoves: List<Move>, computeHeuristics: (Stack) -> Int): Stack {
-		var openList = PriorityQueue()
+		val openList = PriorityQueue()
 		openList.push(stack)
 		val visited = mutableListOf<Int>() // Hash of visited states
 
