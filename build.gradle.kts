@@ -42,6 +42,7 @@ tasks {
 			exceptionFormat = TestExceptionFormat.FULL
 			showStandardStreams = true
 		}
+		maxParallelForks = Runtime.getRuntime().availableProcessors()
 	}
 }
 kotlin {

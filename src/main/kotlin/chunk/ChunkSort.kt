@@ -1,5 +1,6 @@
 package me.emaryllis.chunk
 
+import me.emaryllis.Settings.DEBUG
 import me.emaryllis.Settings.MAX_CHUNK_SIZE
 import me.emaryllis.a_star.AStar
 import me.emaryllis.a_star.HeuristicUtil.getMoveInfo
@@ -16,13 +17,12 @@ class ChunkSort {
 	fun chunkSort(numList: List<Int>): List<Move> {
 		if (numList == numList.sorted()) return emptyList()
 		val chunks: List<Chunk> = defineChunkValues(numList)
-		println("Defined ${chunks.size} chunk(s). ${chunks.map { "${it.minValue}-${it.maxValue}:${it.values}" }}")
+		if (DEBUG) println("Defined ${chunks.size} chunk(s). ${chunks.map { "${it.minValue}-${it.maxValue}:${it.values}" }}")
 		var stack = Stack(
 			CircularBuffer(numList.size, numList),
 			CircularBuffer(numList.size),
 			chunks.first(),
-			null,
-			mutableListOf()
+			null
 		)
 		var oldStack: Stack // Debug
 		if (numList.size <= 5) return SmallSort().smallSort(stack)
@@ -32,16 +32,23 @@ class ChunkSort {
 				stack.prevChunkNum = chunks[i - 1].maxValue
 			}
 			stack.chunk = chunks[i]
-			println("Sorting chunk ${chunks[i].minValue} - ${chunks[i].maxValue}, ${getStackInfo(stack, false)}")
+			if (DEBUG) println(
+				"Sorting chunk ${chunks[i].minValue} - ${chunks[i].maxValue}, ${
+					getStackInfo(
+						stack,
+						false
+					)
+				}"
+			)
 			oldStack = stack.clone() // Debug
 			stack = aStar.sort(stack)
-			println("Chunk ${chunks[i].minValue} - ${chunks[i].maxValue} sorted.")
-			println("New ${getMoveInfo(stack, oldStack)}, ${getStackInfo(stack, false)}")
+			if (DEBUG) println("Chunk ${chunks[i].minValue} - ${chunks[i].maxValue} sorted.")
+			if (DEBUG) println("New ${getMoveInfo(stack, oldStack)}, ${getStackInfo(stack, false)}")
 			i++
 		}
 		shiftSmallestToTop(stack, chunks.first().minValue)
-		println("Shifted smallest to top, final ${getStackInfo(stack)}")
-		return stack.moves
+		if (DEBUG) println("Shifted smallest to top, final ${getStackInfo(stack)}")
+		return stack.moves.toList()
 	}
 
 	private fun defineChunkValues(numList: List<Int>): List<Chunk> {

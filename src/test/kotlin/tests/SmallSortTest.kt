@@ -31,8 +31,7 @@ class SmallSortTest {
 			CircularBuffer(numList.size, numList),
 			CircularBuffer(numList.size),
 			Chunk(0, 0, emptyList()),
-			null,
-			mutableListOf()
+			null
 		)
 		assertTrue(Checker(smallSort.smallSort(stack), numList, numList.sorted()).boolOutput())
 	}

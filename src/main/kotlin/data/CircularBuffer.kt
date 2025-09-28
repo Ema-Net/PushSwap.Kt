@@ -2,21 +2,30 @@ package me.emaryllis.data
 
 import me.emaryllis.Settings.HASH_PRIME
 
-class CircularBuffer(val capacity: Int, numList: List<Int> = emptyList()) : Collection<Int> {
+class CircularBuffer(val capacity: Int, numList: List<Int> = emptyList()) : Collection<Int>, Cloneable {
 	var buffer: IntArray = IntArray(capacity)
-	private var head = 0  // points to next element to read
+	private var head = 0
 	override var size = 0
 		private set
 
+	private var maxValue: Int? = null
+	private var maxDirty: Boolean = false
+
 	init {
-		buffer = IntArray(capacity)  // allocate full capacity
+		buffer = IntArray(capacity)
 		if (numList.isNotEmpty()) {
 			require(numList.size <= capacity) { "List size exceeds buffer capacity" }
 			numList.forEach { value ->
 				buffer[(head + size) % capacity] = value
 				size++
 			}
+			recalculateMax()
 		}
+	}
+
+	private fun recalculateMax() {
+		maxValue = if (isEmpty()) null else indices.maxOfOrNull { get(it) }
+		maxDirty = false
 	}
 
 	fun swap(): Boolean {
@@ -44,6 +53,11 @@ class CircularBuffer(val capacity: Int, numList: List<Int> = emptyList()) : Coll
 		buffer[lastIndex] = 0
 		head = (head - 1 + capacity) % capacity
 		buffer[head] = last
+		// last could be new max
+		if (maxValue == null || last > maxValue!!) {
+			maxValue = last
+			maxDirty = false
+		}
 		return true
 	}
 
@@ -59,11 +73,13 @@ class CircularBuffer(val capacity: Int, numList: List<Int> = emptyList()) : Coll
 		return true
 	}
 
-	fun clone(): CircularBuffer {
+	public override fun clone(): CircularBuffer {
 		val copy = CircularBuffer(capacity)
 		copy.buffer = buffer.copyOf()
 		copy.head = head
 		copy.size = size
+		copy.maxValue = maxValue
+		copy.maxDirty = maxDirty
 		return copy
 	}
 
@@ -72,12 +88,36 @@ class CircularBuffer(val capacity: Int, numList: List<Int> = emptyList()) : Coll
 	val value: List<Int>
 		get() = List(size) { get(it) }
 
+	fun first() = if (isEmpty()) throw NoSuchElementException("CircularBuffer is empty.") else get(0)
+
+	fun last() = if (isEmpty()) throw NoSuchElementException("CircularBuffer is empty.") else get(size - 1)
+
+	fun max(): Int {
+		if (maxDirty) recalculateMax()
+		return maxValue ?: throw NoSuchElementException("CircularBuffer is empty.")
+	}
+
+	fun maxOrNull(): Int? {
+		if (maxDirty) recalculateMax()
+		return maxValue
+	}
+
+	/**
+	 * Returns the logical index of the first occurrence of [element], or -1 if not found.
+	 */
+	fun indexOf(element: Int?): Int {
+		for (i in indices) {
+			if (get(i) == element) return i
+		}
+		return -1
+	}
+
 	// Overrides for equality and hashing
 	override fun equals(other: Any?): Boolean {
 		if (this === other) return true
 		if (other !is CircularBuffer) return false
 		if (this.size != other.size) return false
-		for (i in 0 until size) {
+		for (i in indices) {
 			if (this.buffer[(head + i) % capacity] != other.buffer[(other.head + i) % other.capacity]) return false
 		}
 		return true
@@ -115,7 +155,13 @@ class CircularBuffer(val capacity: Int, numList: List<Int> = emptyList()) : Coll
 	// For testing purposes
 	fun setIfYouNeedTo(i: Int, value: Int) {
 		require(i in indices) { "Index $i out of bounds (size=$size)" }
-		buffer[(head + i) % capacity] = value
+		val idx = (head + i) % capacity
+		if (buffer[idx] == maxValue) maxDirty = true
+		buffer[idx] = value
+		if (maxValue == null || value > maxValue!!) {
+			maxValue = value
+			maxDirty = false
+		}
 	}
 
 	/** Insert at logical tail */
@@ -123,6 +169,10 @@ class CircularBuffer(val capacity: Int, numList: List<Int> = emptyList()) : Coll
 		if (isFull()) return false
 		buffer[(head + size) % capacity] = value
 		size++
+		if (maxValue == null || value > maxValue!!) {
+			maxValue = value
+			maxDirty = false
+		}
 		return true
 	}
 
@@ -133,6 +183,7 @@ class CircularBuffer(val capacity: Int, numList: List<Int> = emptyList()) : Coll
 		buffer[head] = 0 // clear garbage
 		head = (head + 1) % capacity
 		size--
+		if (maxValue == value) maxDirty = true
 		return value
 	}
 }

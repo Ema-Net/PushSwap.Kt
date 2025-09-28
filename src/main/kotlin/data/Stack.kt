@@ -1,5 +1,6 @@
 package me.emaryllis.data
 
+import me.emaryllis.Settings.DEBUG
 import me.emaryllis.Settings.HASH_PRIME
 
 class Stack(
@@ -7,22 +8,19 @@ class Stack(
 	val b: CircularBuffer,
 	var chunk: Chunk,
 	var prevChunkNum: Int?,
-	private val moveList: MutableList<Move>,
+	var moves: PackedMoveList = PackedMoveList.empty(),
 	var heuristic: Int = Int.MAX_VALUE
-) {
-	var moves: MutableList<Move> = moveList
-		get() = moveList
-		private set
-	var currentCost = heuristic
-		get() = moveList.size + heuristic
-		private set
+) : Cloneable {
+	// Returns the move history as a list (from first to last)
+	val currentCost: Int
+		get() = moves.size + heuristic
 
-	fun clone(): Stack = Stack(
+	public override fun clone(): Stack = Stack(
 		a.clone(),
 		b.clone(),
-		chunk.clone(),
+		chunk,
 		prevChunkNum,
-		moveList.toMutableList(),
+		moves.clone(),
 		heuristic
 	)
 
@@ -41,6 +39,7 @@ class Stack(
 				temp2 = b.swap()
 				temp1 && temp2
 			}
+
 			Move.PA -> b.push(a)
 			Move.PB -> a.push(b)
 			Move.RA -> a.rotate()
@@ -50,6 +49,7 @@ class Stack(
 				temp2 = b.rotate()
 				temp1 && temp2
 			}
+
 			Move.RRA -> a.reverseRotate()
 			Move.RRB -> b.reverseRotate()
 			Move.RRR -> {
@@ -58,8 +58,9 @@ class Stack(
 				temp1 && temp2
 			}
 		}
-		if (status) moves.add(move)
-		else if (log) System.err.println("Invalid move: $move.")
+		if (status) {
+			moves = moves.add(move)
+		} else if (log && DEBUG) System.err.println("Invalid move: $move.")
 		return status
 	}
 

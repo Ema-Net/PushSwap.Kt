@@ -19,9 +19,12 @@ class MainTest {
 	companion object {
 		@JvmStatic
 		fun failedTests(): Stream<Arguments> = allPermutations(
-			listOf(121, 127, 145, 151, 169, 175, 241, 247,
-					25, 265, 271, 289, 290, 295, 296, 31, 361,
-					367, 368, 385, 386, 391, 392, 409, 410, 415, 416, 49, 55, 7))
+			listOf(
+				121, 127, 145, 151, 169, 175, 241, 247,
+				25, 265, 271, 289, 290, 295, 296, 31, 361,
+				367, 368, 385, 386, 391, 392, 409, 410, 415, 416, 49, 55, 7
+			)
+		)
 
 		@JvmStatic
 		fun allTests(): Stream<Arguments> = allPermutations()
@@ -35,7 +38,6 @@ class MainTest {
 				tests.map { idx -> Arguments.of(baseList.nthPermutation(idx - 1)) }.stream()
 			}
 		}
-
 	}
 
 	private fun check(numList: List<Int>): Pair<Boolean, List<Move>> {

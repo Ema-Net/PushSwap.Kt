@@ -1,8 +1,9 @@
 package me.emaryllis.a_star
 
-import me.emaryllis.a_star.HeuristicUtil.getCostInfo
+import me.emaryllis.Settings.DEBUG
 import me.emaryllis.a_star.HeuristicUtil.getMoveInfo
 import me.emaryllis.a_star.HeuristicUtil.getStackInfo
+import me.emaryllis.data.Chunk
 import me.emaryllis.data.Move
 import me.emaryllis.data.PriorityQueue
 import me.emaryllis.data.Stack
@@ -13,20 +14,23 @@ class AStar {
 	private val states = BestStates()
 
 	fun sort(stack: Stack): Stack {
+		if (inSortedOrder(stack) && stack.chunk.maxValue != stack.a.maxOrNull()!!) {
+			if (DEBUG) println("Chunk ${stack.chunk.minValue} - ${stack.chunk.maxValue} is already in sorted order.")
+			return stack
+		}
 		var newStack = stack.clone()
 		var oldStack = newStack.clone() // Debug
 		newStack = aStar(newStack, Move.pushAllowed, pushHeuristic::calculate)
+		newStack.heuristic = pullHeuristic.calculate(newStack)
 
 		// Debug info
-		println("Pushed with ${newStack.moves.size - oldStack.moves.size} moves, ${getStackInfo(newStack, false)}")
-		println(getMoveInfo(newStack, oldStack))
+		if (DEBUG) println("Pushed: ${getStackInfo(newStack, false)} ${getMoveInfo(newStack, oldStack)}")
 
 		oldStack = newStack.clone()
 		newStack = aStar(newStack, Move.pullAllowed, pullHeuristic::calculate)
 
 		// Debug info
-		println("Pulled: ${getStackInfo(newStack, false)}")
-		println(getMoveInfo(newStack, oldStack))
+		if (DEBUG) println("Pulled: ${getStackInfo(newStack, false)} ${getMoveInfo(newStack, oldStack)}")
 
 		return newStack
 	}
@@ -34,7 +38,7 @@ class AStar {
 	private fun aStar(stack: Stack, allowedMoves: List<Move>, computeHeuristics: (Stack) -> Int): Stack {
 		val openList = PriorityQueue()
 		openList.push(stack)
-		val visited = mutableListOf<Int>() // Hash of visited states
+		val visited = mutableSetOf<Int>() // Hash of visited states
 
 		// Debug variables
 		val visitedOrder = mutableMapOf<Int, Int>() // Hash of visited states with iteration count
@@ -43,15 +47,15 @@ class AStar {
 		while (openList.isNotEmpty()) {
 			iteration++
 			val currentStack = openList.pop()
-			println("I: $iteration, Size: ${openList.size}, ${getStackInfo(currentStack)}, " +
-							"OpenList(${openList.size})}: ${getCostInfo(openList.value)}")
+			if (DEBUG) println("\nI: $iteration, Size: ${openList.size}, ${getStackInfo(currentStack)}, " +
+																"OpenList(${openList.size})")
 			if (canExit(currentStack, allowedMoves, computeHeuristics)) {
 				return currentStack
 			}
 
 			val hash = currentStack.hashCode()
 			if (hasVisited(hash, visited, visitedOrder, iteration)) {
-				System.err.println("Skipping visited state (Iteration ${visitedOrder[hash]})")
+				if (DEBUG) System.err.println("Skipping visited state (Iteration ${visitedOrder[hash]})")
 				continue
 			}
 			if (states.canPull(currentStack, openList, allowedMoves, computeHeuristics)) continue
@@ -77,11 +81,23 @@ class AStar {
 	}
 
 	private fun hasVisited(
-		hashCode: Int, visited: MutableList<Int>, visitedOrder: MutableMap<Int, Int>, iteration: Int
+		hashCode: Int, visited: MutableSet<Int>, visitedOrder: MutableMap<Int, Int>, iteration: Int
 	): Boolean {
-		if (hashCode in visited) return true
-		visited.add(hashCode)
+		if (!visited.add(hashCode)) return true // add returns false if already present
 		visitedOrder[hashCode] = iteration
 		return false
+	}
+
+	/**
+	 * Checks if all chunk elements in A are in sorted order.
+	 * Used to exit early during pushing phase if A is already sorted.
+	 *
+	 * Time complexity: O(n)
+	 *
+	 * Space complexity: O(k) -> [Chunk.values]'s size
+	 */
+	private fun inSortedOrder(stack: Stack): Boolean {
+		val values = stack.a.filter { it in stack.chunk }
+		return values == values.sorted()
 	}
 }

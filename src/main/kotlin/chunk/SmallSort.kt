@@ -62,6 +62,6 @@ class SmallSort {
 		repeat(numToPush) {
 			stack.apply(Move.PA)
 		}
-		return stack.moves
+		return stack.moves.toList()
 	}
 }

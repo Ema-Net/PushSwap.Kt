@@ -5,10 +5,6 @@ import me.emaryllis.utils.Utils.hasDuplicates
 import java.util.logging.Logger
 import java.util.logging.Logger.GLOBAL_LOGGER_NAME
 
-object Logger {
-	val logger = Logger.getLogger(GLOBAL_LOGGER_NAME)
-}
-
 /**
  * Processes a list of strings, converting each to an integer.
  * If it encounters a non-integer string, it returns false.
