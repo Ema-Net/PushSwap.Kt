@@ -13,7 +13,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
 import kotlin.streams.asStream
 
-class MainTest {
+class PermutationTest {
 	private val chunkSort = ChunkSort()
 
 	companion object {
