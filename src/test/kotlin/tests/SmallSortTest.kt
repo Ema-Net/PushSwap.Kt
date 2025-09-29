@@ -21,7 +21,7 @@ class SmallSortTest {
 	companion object {
 		@JvmStatic
 		fun smallSortTest(): Stream<Arguments> = listOf(3, 4, 5)
-			.flatMap { size -> (1..size).toList().permutations().toList() }
+			.flatMap { (1..it).toList().permutations().toList() }
 			.map { Arguments.of(it) }
 			.stream()
 	}

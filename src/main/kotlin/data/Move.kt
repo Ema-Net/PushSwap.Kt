@@ -2,9 +2,9 @@ package me.emaryllis.data
 
 enum class Move {
 	SA, // Only used in small sort
-	SB, // Only used in checker test
-	SS, // Only used in pushing b to a
-	PA, PB, RA, RB, RR, RRA, RRB, RRR;
+	SB, SS, // Only used in pull phase
+	PA, PB, RA, RB, RR, RRA, RRB, RRR,
+	DONOTUSEONLYFORTESTING; // Used to test invalid move in CheckerTest
 
 	companion object {
 		private val inverseMap = mapOf(

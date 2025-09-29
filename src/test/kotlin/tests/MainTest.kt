@@ -35,7 +35,7 @@ class MainTest {
 			return if (tests.isEmpty()) {
 				baseList.permutations().map { Arguments.of(it) }.asStream()
 			} else {
-				tests.map { idx -> Arguments.of(baseList.nthPermutation(idx - 1)) }.stream()
+				tests.map { Arguments.of(baseList.nthPermutation(it - 1)) }.stream()
 			}
 		}
 	}

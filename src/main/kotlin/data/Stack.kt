@@ -57,6 +57,8 @@ class Stack(
 				temp2 = b.reverseRotate()
 				temp1 && temp2
 			}
+
+			else -> error("Invalid move: $move") // Only reached if using DONOTUSEONLYFORTESTING
 		}
 		if (status) {
 			moves = moves.add(move)

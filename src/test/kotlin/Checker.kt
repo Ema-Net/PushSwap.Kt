@@ -1,3 +1,4 @@
+import Settings.DEBUG
 import me.emaryllis.data.CircularBuffer
 import me.emaryllis.data.Move
 
@@ -18,36 +19,43 @@ class Checker(private val moves: List<Move>, private val numList: List<Int>, pri
 		Move.RRR to { a.reverseRotateBoth(b) }
 	)
 
-	private fun checker(): Boolean {
+	private fun checker(): Boolean? {
+		val keys = opsMap.keys
+		if (moves.any { it !in keys }) {
+			if (DEBUG) System.err.print("Invalid move found: $moves")
+			return null
+		}
+		if (numList.size != numList.toSet().size || expectedNumList.size != expectedNumList.toSet().size) return null
+		if (moves.isEmpty()) {
+			if (numList.isEmpty() || numList == numList.sorted()) return true
+			else if (expectedNumList != expectedNumList.sorted()) error("This permutation is never possible.")
+		}
 		moves.forEach {
-			if (opsMap[it]?.invoke() == null) {
-				System.err.println("Failed to invoke operation: $it")
+			if (opsMap[it]?.invoke() != true) {
+				if (DEBUG) System.err.print("Failed to execute move: $it. Stack A: ${a.toList()}, Stack B: ${b.toList()}.|")
 				return false
 			}
 		}
-		if (!b.isEmpty()) {
-			System.err.println("Stack B is not empty. Size: ${b.size}")
+		if (b.isNotEmpty()) {
+			if (DEBUG) System.err.print("Stack B is not empty. Size: ${b.size}|")
 			return false
 		}
 		val status = a.value.toList() == expectedNumList
-		if (!status) {
-			System.err.println("Expected: $expectedNumList, Got: ${a.value.toList()}.")
+		if (!status && DEBUG) {
+			System.err.print("Expected: $expectedNumList, Got: ${a.value.toList()}.|")
 		}
 		return status
 	}
 
 	fun boolOutput(): Boolean {
-		return if (moves.isEmpty()) {
-			numList.isEmpty() || numList == numList.sorted()
-		} else if (!checker()) false
-		else true
+		return checker() ?: false
 	}
 
 	fun output() {
-		if (moves.isEmpty()) {
-			if (numList.isEmpty() || numList == numList.sorted()) println("OK")
-			else System.err.println("Error")
-		} else if (!checker()) println("KO")
-		else println("OK")
+		when (checker()) {
+			null -> System.err.println("Error")
+			true -> println("OK")
+			false -> System.err.println("KO")
+		}
 	}
 }
