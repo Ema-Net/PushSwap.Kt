@@ -3,6 +3,13 @@ package me.emaryllis.data
 import me.emaryllis.Settings.DEBUG
 import me.emaryllis.Settings.HASH_PRIME
 
+/**
+ * Stack represents the state of the PushSwap problem, including
+ * both buffers, chunk boundaries, move history, and heuristic.
+ *
+ * Time complexity: Most operations are O(1), except clone, equals, hashCode.
+ * Space complexity: O(n) for stack and move storage.
+ */
 class Stack(
 	val a: CircularBuffer,
 	val b: CircularBuffer,
@@ -11,10 +18,18 @@ class Stack(
 	var moves: PackedMoveList = PackedMoveList.empty(),
 	var heuristic: Int = Int.MAX_VALUE
 ) : Cloneable {
-	// Returns the move history as a list (from first to last)
+	/**
+	 * Time & Space Complexity: O(1)
+	 *
+	 * Returns the total cost for this state: move count plus heuristic estimate.
+	 */
 	val currentCost: Int
 		get() = moves.size + heuristic
 
+	/**
+	 * Time & Space Complexity: O(n), n = Sum of A & B's sizes.
+	 * @return A deep copy of all Stack data.
+	 */
 	public override fun clone(): Stack = Stack(
 		a.clone(),
 		b.clone(),
@@ -25,8 +40,18 @@ class Stack(
 	)
 
 	/**
-	 * Had to use stupid hacky way of assigning temp variables for moves that affect both stacks
-	 * to prevent compiler from not executing both functions when the first returns false.
+	 * Purpose: Executes the given move, updating the stack state
+	 * and recording the move if successful. For moves affecting
+	 * both stacks, uses temp variables to ensure both operations
+	 * are executed. (Very dumb) If the move is invalid, logs an
+	 * error if [log] is true and [DEBUG] is enabled.
+	 *
+	 * Time Complexity: O(1) (amortized, except for resizing of [moves] by [PackedMoveList]).
+	 *
+	 * Space Complexity: O(1) for mutation, O(m) for history -> m = [moves]'s size.
+	 * @param move The move to apply.
+	 * @param log Whether to log invalid moves (default true).
+	 * @return true if the move was successfully applied, false otherwise.
 	 */
 	fun apply(move: Move, log: Boolean = true): Boolean {
 		val temp1: Boolean
@@ -66,17 +91,33 @@ class Stack(
 		return status
 	}
 
+	/**
+	 * Checks logical equality of Stack contents,
+	 * move history size, and heuristic.
+	 *
+	 * Time Complexity: O(n), n = stack size
+	 *
+	 * Space Complexity: O(1)
+	 * @param other Object to compare.
+	 * @return True if stacks are logically equal, false otherwise.
+	 */
 	override fun equals(other: Any?): Boolean {
 		if (this === other) return true
 		if (other !is Stack) return false
-		return hashCode() == other.hashCode()
+		return hashCode() == other.hashCode() && moves.size == other.moves.size && heuristic == other.heuristic
 	}
 
+	/**
+	 * Hashes the Stack by combining the hashes of both buffers.
+	 * Purpose: Enables fast lookup and deduplication in hash-based collections.
+	 *
+	 * Time Complexity: O(n), n = stack size
+	 *
+	 * Space Complexity: O(1)
+	 *
+	 * @return Hash code based on both buffers.
+	 */
 	override fun hashCode(): Int {
-		var result = a.hashCode()
-		listOf(b.hashCode(), chunk.hashCode(), heuristic).forEach {
-			result = HASH_PRIME * result + it
-		}
-		return result
+		return HASH_PRIME * a.hashCode() + b.hashCode()
 	}
 }

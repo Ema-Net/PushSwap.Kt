@@ -2,19 +2,39 @@ package me.emaryllis.a_star
 
 import me.emaryllis.Settings.DEBUG
 import me.emaryllis.data.Move
-import me.emaryllis.data.PriorityQueue
 import me.emaryllis.data.Stack
 import me.emaryllis.utils.Debug.getStackInfo
 
+/**
+ * BestStates generates all valid next states from a given stack and allowed moves.
+ * - Uses MixedHeuristic for scoring.
+ * - Applies conditional swap optimizations (SS > SA > SB).
+ * - Guards against invalid moves and redundant expansions.
+ *
+ * - Time & space complexity: See [getBestStates].
+ * @see getBestStates
+ */
 class BestStates {
+	private val heuristic = MixedHeuristic()
+
+	/**
+	 * Returns all valid successor states from originalStack using allowedMoves.
+	 * - Applies each move, checks validity, and optimizes with swaps.
+	 * - Lets the priority queue handle ordering; no beam narrowing.
+	 *
+	 * - Time complexity: O(m * f) -> m = [allowedMoves]'s size, f = [applyMoveIfValid].
+	 *
+	 * - Space complexity: O(m) -> output of [Stack] size
+	 * @see Stack
+	 * @see applyMoveIfValid
+	 */
 	fun getBestStates(
 		originalStack: Stack,
 		allowedMoves: List<Move>,
-		computeHeuristics: (Stack) -> Int,
 	): List<Stack> {
 		val possibleStates = mutableListOf<Stack>()
 		for (move in allowedMoves) {
-			val currentStack = applyMoveIfValid(originalStack, move, computeHeuristics)
+			val currentStack = applyMoveIfValid(originalStack, move)
 			if (currentStack != null) {
 				if (DEBUG) println(
 					"\nApplied move: $move (Valid moves: $allowedMoves)\n" +
@@ -23,110 +43,89 @@ class BestStates {
 				possibleStates.add(currentStack)
 			}
 		}
-		return findBestStates(possibleStates)
+		return possibleStates
 	}
 
 	/**
-	 * Fast checks for invalid moves to skip unnecessary cloning and applying.
-	 * Conditions:
-	 * - Inverse move (e.g. PA followed by PB)
-	 * - SS move that swaps previous chunk values in A (if prevChunkNum is set)
-	 * - PB move when A is empty or first num of A is not in current chunk
+	 * Fast invalidation check for moves.
+	 * - Prunes inverse moves.
+	 * - Guards PB to only push chunk elements from A to B. (Obtained from [Stack.chunk])
+	 * - Guards PA to only pull if B not empty (B should only contain current chunk values by invariant).
+	 *
+	 * - Time & space complexity: O(1).
 	 */
-	private fun invalidFast(
-		originalStack: Stack,
-		move: Move
-	): Boolean {
-		if (originalStack.moves.isNotEmpty() && originalStack.moves.lastOrNull() == move.inverse()) {
-			if (DEBUG) System.err.println("Invalid move: $move. (Inverse)")
-			return true
-		}
-		if (move == Move.SS && originalStack.prevChunkNum != null && originalStack.a.isNotEmpty()
-			&& (originalStack.a[0] <= originalStack.prevChunkNum!! || originalStack.a[1] <= originalStack.prevChunkNum!!)
-		) {
-			if (DEBUG) System.err.println("Invalid move: $move. (Swapping previous chunk values)")
-			return true
-		}
-		if (move == Move.PB && (originalStack.a.isEmpty() || originalStack.a.first() !in originalStack.chunk)) {
-			if (DEBUG) System.err.println(
-				"Invalid move: $move. Cannot push non-chunk numbers. " +
-						"Got: ${originalStack.a.firstOrNull()}. Expected: ${originalStack.chunk.values}"
-			)
-			return true
-		}
+	private fun invalidFast(originalStack: Stack, move: Move): Boolean {
+		if (originalStack.moves.isNotEmpty() && originalStack.moves.lastOrNull() == move.inverse()) return true
+		if (move == Move.PB && (originalStack.a.isEmpty() || originalStack.a.first() !in originalStack.chunk)) return true
+		if (move == Move.PA && originalStack.b.isEmpty()) return true
 		return false
 	}
 
 	/**
-	 * Returns all best states after applying all allowed moves to the original stack.
-	 * Invalid states (inverse moves or Int.MIN_VALUE heuristics) are skipped.
+	 * Applies a move to a clone of the original stack if valid.
+	 * - Recomputes heuristic after move and after conditional swaps.
+	 * - Returns null if move is invalid or heuristic < 0.
+	 * - Time: O(f), f = cost of [Stack.clone] + [Stack.apply] + [MixedHeuristic] + [conditionalOptimize].
+	 *
+	 * - Space: O(m) -> m = [Stack.clone]'s size.
+	 * @see Stack.clone
+	 * @see Stack.apply
+	 * @see MixedHeuristic
+	 * @see conditionalOptimize
 	 */
-	private fun applyMoveIfValid(
-		originalStack: Stack,
-		move: Move,
-		computeHeuristics: (Stack) -> Int
-	): Stack? {
-		// Fast checks (inverse, chunk, etc.)
-		if (invalidFast(originalStack, move)) return null
-
-		val stack = originalStack.clone()
-		if (!stack.apply(move)) {
-			if (DEBUG) System.err.println("Invalid move: $move.")
-			return null
+	private fun applyMoveIfValid(original: Stack, move: Move): Stack? {
+		if (invalidFast(original, move)) return null
+		val stack = original.clone()
+		if (!stack.apply(move)) return null
+		stack.heuristic = heuristic.calculate(stack)
+		if (conditionalOptimize(stack)) {
+			stack.heuristic = heuristic.calculate(stack)
 		}
-		if (move == Move.SS && stack.a.size > 3 && stack.a[0] > stack.a[1]) {
-			if (DEBUG) System.err.println("Invalid move: $move. (SS ruined order in A)")
-			return null
-		}
-		stack.heuristic = computeHeuristics(stack)
-		if (stack.heuristic < 0) {
-			if (DEBUG) System.err.println("Skipping state with negative heuristic after move: $move")
-			return null
-		}
+		if (stack.heuristic < 0) return null
 		return stack
 	}
 
 	/**
-	 * Conditions:
-	 * - Is pulling phase
-	 * - If first num of B is max of B (Since pushing is FILO, so it requires B to be in descending order)
-	 * - If first num of A is the last number of the previous chunk
-	 * (If A is not empty - Edge case for 1 chunk when all num are in B)
+	 * Opportunistically applies conditional swaps (SS > SA > SB) to improve ordering.
+	 * Ignoring the return type of [Stack.apply] since preconditions were checked.
+	 * - Checks if it is able to swap both.
+	 * - Checks if it is able to swap A [canSA]
+	 * - Checks if its able to swap B.
 	 *
-	 * If met, applies PA and returns true.
-	 * This is a forced move, so the heuristic is recalculated.
-	 * @return true if PA was applied, else false.
-	 * */
-	fun canPull(
-		stack: Stack,
-		openList: PriorityQueue,
-		allowedMoves: List<Move>,
-		computeHeuristics: (Stack) -> Int
-	): Boolean {
-		if (!Move.isPull(allowedMoves) || stack.b.isEmpty() || stack.b.first() != stack.b.maxOrNull()
-			|| (stack.a.isNotEmpty() && stack.prevChunkNum != null && stack.a.last() != stack.prevChunkNum)
-		) return false
-		if (DEBUG) println("Forcing PA. (B[0] is aligned)")
-		stack.apply(Move.PA)
-		stack.heuristic = computeHeuristics(stack)
-		if (DEBUG) println("After: ${getStackInfo(stack)}")
-		openList.push(stack)
-		return true
+	 * Conditions:
+	 * - Swapping A: [canSA]
+	 * - Swapping B: only if B has at least 2 elements and b[0] < b[1].
+	 * (Improves descending order since pushing is FILO)
+	 *
+	 * Time & Space Complexity: O(1).
+	 *
+	 * @return true if a swap was made, false otherwise.
+	 */
+	private fun conditionalOptimize(stack: Stack): Boolean {
+		val canSA = canSA(stack)
+		val canSB = stack.b.size >= 2 && stack.b[0] < stack.b[1]
+
+		return when {
+			canSA && canSB -> stack.apply(Move.SS)
+			canSA -> stack.apply(Move.SA)
+			canSB -> stack.apply(Move.SB)
+			else -> false
+		}
 	}
 
-	private fun findBestStates(states: List<Stack>): List<Stack> {
-		var minScore = Int.MAX_VALUE
-		val result = mutableListOf<Stack>()
-		for (s in states) {
-			val cost = s.currentCost
-			if (cost < minScore) {
-				minScore = cost
-				result.clear()
-				result.add(s)
-			} else if (cost == minScore) {
-				result.add(s)
-			}
-		}
-		return result
+	/**
+	 * Checks if SA (swap A) is valid and beneficial.
+	 * - Only swaps current chunk elements, not previous chunk values.
+	 * - Improves ascending order if a[0] > a[1].
+	 *
+	 * Time & Space Complexity: O(1).
+	 *
+	 * @return true if SA is valid and beneficial, false otherwise.
+	 */
+	private fun canSA(stack: Stack): Boolean {
+		if (stack.a.size < 2) return false
+		if (stack.a[0] !in stack.chunk || stack.a[1] !in stack.chunk) return false
+		if (stack.prevChunkNum != null && (stack.a[0] <= stack.prevChunkNum!! || stack.a[1] <= stack.prevChunkNum!!)) return false
+		return stack.a[0] > stack.a[1]
 	}
 }

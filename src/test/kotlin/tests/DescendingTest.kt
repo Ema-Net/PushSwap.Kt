@@ -19,7 +19,7 @@ class DescendingTest {
 		private val failed = AtomicBoolean(false)
 
 		@JvmStatic
-		fun descendingTest(): Stream<Arguments> = perms(100, 100)
+		fun descendingTest(): Stream<Arguments> = perms(500, 500)
 
 		@Suppress("SameParameterValue")
 		private fun perms(from: Int, until: Int): Stream<Arguments> {

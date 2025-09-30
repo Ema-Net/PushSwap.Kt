@@ -1,7 +1,4 @@
-import groovyjarjarantlr.build.ANTLR.jarName
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
 	kotlin("jvm") version "2.1.10"
@@ -43,6 +40,8 @@ tasks {
 			showStandardStreams = true
 		}
 		maxParallelForks = Runtime.getRuntime().availableProcessors()
+		maxHeapSize = "5G"
+		jvmArgs = listOf("-XX:+UseG1GC")
 	}
 }
 kotlin {
