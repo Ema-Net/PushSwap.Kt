@@ -15,8 +15,8 @@ class PushHeuristic {
 	 *
 	 * Time complexity: (k elements eligible) O(n + k * m),
 	 * worst case (all elements eligible): O(n * m).
-	 * - n = A's size, k = no of chunk elements in A (k <= n),
-	 * m = [minRotIdxB]'s complexity
+	 * - n = A's size, k = current chunk elements' size
+	 * in A (k <= n), m = [minRotIdxB]'s complexity
 	 *
 	 * Space complexity: O(1) auxiliary.
 	 *
@@ -46,6 +46,4 @@ class PushHeuristic {
 		if (minRotationCost == Int.MAX_VALUE) minRotationCost = 0
 		return eligible + minRotationCost
 	}
-
-
 }

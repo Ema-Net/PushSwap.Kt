@@ -2,6 +2,11 @@ package me.emaryllis.data
 
 /**
  * Stores a list of Move as a bit-packed array (4 bits per move, up to 16 moves per Long).
+ * @property BITS_PER_MOVE Number of bits used to store each move (4 bits for up to 16 possible moves).
+ * @property MOVES_PER_LONG Number of moves that can be stored in a single Long (16 moves).
+ * @property MOVE_MASK Bitmask to extract a single move from a Long (0xF).
+ * @property data The underlying LongArray storing the packed moves.
+ * @property size The number of moves currently stored in the list.
  */
 class PackedMoveList private constructor(
 	private val data: LongArray,

@@ -20,7 +20,7 @@ class SmallSortTest {
 
 	companion object {
 		@JvmStatic
-		fun smallSortTest(): Stream<Arguments> = listOf(3, 4, 5)
+		fun smallSort(): Stream<Arguments> = listOf(3, 4, 5)
 			.flatMap { (1..it).toList().permutations().toList() }
 			.map { Arguments.of(it) }
 			.stream()
@@ -37,17 +37,17 @@ class SmallSortTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("smallSortTest")
-	fun smallSortTest(numList: List<Int>) {
+	@MethodSource("smallSort")
+	fun smallSort(numList: List<Int>) {
 		if (DEBUG) return check(numList)
 		suppressAllOutput(::check, numList)
 	}
 
 	@Test
-	fun noOutputTest() {
-		smallSortTest(emptyList())
-		smallSortTest(listOf(1))
-		smallSortTest(listOf(1, 2))
-		smallSortTest(listOf(1, 2, 3))
+	fun noOutputSmallSort() {
+		smallSort(emptyList())
+		smallSort(listOf(1))
+		smallSort(listOf(1, 2))
+		smallSort(listOf(1, 2, 3))
 	}
 }

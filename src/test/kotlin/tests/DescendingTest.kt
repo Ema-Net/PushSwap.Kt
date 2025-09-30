@@ -19,7 +19,7 @@ class DescendingTest {
 		private val failed = AtomicBoolean(false)
 
 		@JvmStatic
-		fun allTests(): Stream<Arguments> = perms(100, 100)
+		fun descendingTest(): Stream<Arguments> = perms(100, 100)
 
 		@Suppress("SameParameterValue")
 		private fun perms(from: Int, until: Int): Stream<Arguments> {
@@ -35,8 +35,8 @@ class DescendingTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("allTests")
-	fun runUntil(numList: List<Int>) {
+	@MethodSource("descendingTest")
+	fun descendingTest(numList: List<Int>) {
 		Assumptions.assumeFalse(failed.get())
 		if (DEBUG) {
 			check(numList)

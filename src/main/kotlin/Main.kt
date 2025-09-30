@@ -2,8 +2,6 @@ package me.emaryllis
 
 import me.emaryllis.chunk.ChunkSort
 import me.emaryllis.utils.Utils.hasDuplicates
-import java.util.logging.Logger
-import java.util.logging.Logger.GLOBAL_LOGGER_NAME
 
 /**
  * Processes a list of strings, converting each to an integer.

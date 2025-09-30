@@ -1,10 +1,10 @@
 package me.emaryllis.a_star
 
 import me.emaryllis.Settings.DEBUG
-import me.emaryllis.a_star.HeuristicUtil.getStackInfo
 import me.emaryllis.data.Move
 import me.emaryllis.data.PriorityQueue
 import me.emaryllis.data.Stack
+import me.emaryllis.utils.Debug.getStackInfo
 
 class BestStates {
 	fun getBestStates(

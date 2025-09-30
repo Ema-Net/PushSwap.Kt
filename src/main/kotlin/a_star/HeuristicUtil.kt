@@ -1,20 +1,9 @@
 package me.emaryllis.a_star
 
-import me.emaryllis.Settings.DEBUG
 import me.emaryllis.data.CircularBuffer
-import me.emaryllis.data.Move
-import me.emaryllis.data.Stack
 import me.emaryllis.data.VirtualRotatedBuffer
 
 object HeuristicUtil {
-	/**
-	 * Returns the number of elements in the buffer that are in its place
-	 */
-	fun noOfSorted(buffer: CircularBuffer): Int {
-		val sorted = buffer.sorted()
-		return buffer.withIndex().count { (index, value) -> value == sorted[index] }
-	}
-
 	/**
 	 * Counts the number of inversions in a list of integers.
 	 * An inversion is a pair of elements where the earlier element is
@@ -41,6 +30,7 @@ object HeuristicUtil {
 	}
 
 	private val minRotIdxBCache = mutableMapOf<Pair<Int, Int>, Int>()
+	fun resetMinRotIdxBCache() = minRotIdxBCache.clear()
 
 	/**
 	 * Computes the minimal number of single-stack rotations needed to bring stack B
@@ -80,43 +70,5 @@ object HeuristicUtil {
 		val result = minOf(bestRot, size - bestRot)
 		minRotIdxBCache[cacheKey] = result
 		return result
-	}
-
-	/**
-	 * Checks if performing a double rotation (RR or RRR) would improve the sortedness score.
-	 * If it does, generate a bonus score equal to the improvement.
-	 * Otherwise, returns 0.
-	 *
-	 * Time complexity: O(2n² + n) = O(n²)
-	 * - Clone the stack (O(n))
-	 * - Calculate sortednessScore for both a and b (O(n²) each)
-	 *
-	 * Space complexity: O(n) (Stack clone)
-	 */
-	fun doubleOpsBonus(stack: Stack, oldScore: Int, move: Move): Int {
-		val newStack = stack.clone()
-		newStack.apply(move, log = false)
-		val newScore = sortednessScore(newStack.a.value) + sortednessScore(newStack.b.value, true)
-		if (newScore > oldScore) {
-			return newScore - oldScore // bonus for double rotation
-		}
-		return oldScore
-	}
-
-	fun getMoveInfo(newStack: Stack, oldStack: Stack): String {
-		return if (DEBUG) "Moves(${newStack.moves.size - oldStack.moves.size}): ${
-			newStack.moves.toList().subList(
-				oldStack.moves.size,
-				newStack.moves.size
-			)
-		}" else ""
-	}
-
-	fun getCostInfo(stack: Stack): String =
-		if (DEBUG) "g: ${stack.moves.size}, h: ${stack.heuristic}, f: ${stack.currentCost}" else ""
-
-	fun getStackInfo(stack: Stack, moves: Boolean = true): String {
-		return if (DEBUG) "A: ${stack.a.value}, B: ${stack.b.value}, Chunk: ${stack.chunk.minValue}-${stack.chunk.maxValue}, " +
-				"${getCostInfo(stack)}, ${if (moves) "Moves(${stack.moves.size}): ${stack.moves.toList()}" else ""}" else ""
 	}
 }

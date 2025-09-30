@@ -83,7 +83,7 @@ class CheckerTest {
 
 	@ParameterizedTest
 	@MethodSource("checkerTest")
-	fun verifyCheckerTest(moves: List<Move>, numList: List<Int>, expectedNumList: List<Int>, expected: String) {
+	fun checkerTest(moves: List<Move>, numList: List<Int>, expectedNumList: List<Int>, expected: String) {
 		val outContent = ByteArrayOutputStream()
 		val errContent = ByteArrayOutputStream()
 		var status = listOf<String>()

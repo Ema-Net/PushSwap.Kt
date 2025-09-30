@@ -1,12 +1,12 @@
 package me.emaryllis.a_star
 
 import me.emaryllis.Settings.DEBUG
-import me.emaryllis.a_star.HeuristicUtil.getMoveInfo
-import me.emaryllis.a_star.HeuristicUtil.getStackInfo
 import me.emaryllis.data.Chunk
 import me.emaryllis.data.Move
 import me.emaryllis.data.PriorityQueue
 import me.emaryllis.data.Stack
+import me.emaryllis.utils.Debug.getMoveInfo
+import me.emaryllis.utils.Debug.getStackInfo
 
 class AStar {
 	private val pullHeuristic = PullHeuristic()
@@ -29,6 +29,8 @@ class AStar {
 		oldStack = newStack.clone()
 		newStack = aStar(newStack, Move.pullAllowed, pullHeuristic::calculate)
 
+		HeuristicUtil.resetMinRotIdxBCache()
+
 		// Debug info
 		if (DEBUG) println("Pulled: ${getStackInfo(newStack, false)} ${getMoveInfo(newStack, oldStack)}")
 
@@ -47,8 +49,10 @@ class AStar {
 		while (openList.isNotEmpty()) {
 			iteration++
 			val currentStack = openList.pop()
-			if (DEBUG) println("\nI: $iteration, Size: ${openList.size}, ${getStackInfo(currentStack)}, " +
-																"OpenList(${openList.size})")
+			if (DEBUG) println(
+				"\nI: $iteration, Size: ${openList.size}, ${getStackInfo(currentStack)}, " +
+						"OpenList(${openList.size})"
+			)
 			if (canExit(currentStack, allowedMoves, computeHeuristics)) {
 				return currentStack
 			}

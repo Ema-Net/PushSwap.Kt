@@ -3,12 +3,12 @@ package me.emaryllis.chunk
 import me.emaryllis.Settings.DEBUG
 import me.emaryllis.Settings.MAX_CHUNK_SIZE
 import me.emaryllis.a_star.AStar
-import me.emaryllis.a_star.HeuristicUtil.getMoveInfo
-import me.emaryllis.a_star.HeuristicUtil.getStackInfo
 import me.emaryllis.data.Chunk
 import me.emaryllis.data.CircularBuffer
 import me.emaryllis.data.Move
 import me.emaryllis.data.Stack
+import me.emaryllis.utils.Debug.getMoveInfo
+import me.emaryllis.utils.Debug.getStackInfo
 import java.lang.Integer.min
 
 class ChunkSort {

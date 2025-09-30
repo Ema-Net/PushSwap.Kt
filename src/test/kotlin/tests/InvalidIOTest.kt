@@ -13,7 +13,7 @@ import java.util.stream.Stream
 class InvalidIOTest {
 	companion object {
 		@JvmStatic
-		fun errorTest(): Stream<Arguments> = Stream.of(
+		fun invalidIO(): Stream<Arguments> = Stream.of(
 			Arguments.of(arrayOf(""), ""),
 			Arguments.of(arrayOf(" "), "Error\n"),
 			Arguments.of(arrayOf("Hello World"), "Error\n"),
@@ -22,15 +22,18 @@ class InvalidIOTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("errorTest")
-	fun verifyErrorTest(numList: Array<String>, expected: String) {
+	@MethodSource("invalidIO")
+	fun invalidIO(numList: Array<String>, expected: String) {
 		val errContent = ByteArrayOutputStream()
 		val originalErr = System.err
 		try {
 			System.setErr(PrintStream(errContent))
 			main(numList)
 			val stderr = errContent.toString().replace("\r", "")
-			assertTrue(stderr.contains(expected), "Expected: '${expected.showNewline()}', but got: '${stderr.showNewline()}'")
+			assertTrue(
+				stderr.contains(expected),
+				"Expected: '${expected.showNewline()}', but got: '${stderr.showNewline()}'"
+			)
 		} finally {
 			System.setErr(originalErr)
 		}

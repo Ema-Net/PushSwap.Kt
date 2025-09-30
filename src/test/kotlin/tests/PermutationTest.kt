@@ -18,18 +18,16 @@ class PermutationTest {
 
 	companion object {
 		@JvmStatic
-		fun failedTests(): Stream<Arguments> = allPermutations(
+		fun failedPermutation(): Stream<Arguments> = generatePermutations(
 			listOf(
-				121, 127, 145, 151, 169, 175, 241, 247,
-				25, 265, 271, 289, 290, 295, 296, 31, 361,
-				367, 368, 385, 386, 391, 392, 409, 410, 415, 416, 49, 55, 7
+				20, 22, 24
 			)
 		)
 
 		@JvmStatic
-		fun allTests(): Stream<Arguments> = allPermutations()
+		fun allPermutations(): Stream<Arguments> = generatePermutations()
 
-		private fun allPermutations(tests: List<Int> = emptyList()): Stream<Arguments> {
+		private fun generatePermutations(tests: List<Int> = emptyList()): Stream<Arguments> {
 			val size = 7
 			val baseList = (1..size).toList()
 			return if (tests.isEmpty()) {
@@ -47,8 +45,8 @@ class PermutationTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("allTests")
-	fun runAll(numList: List<Int>) {
+	@MethodSource("allPermutations")
+	fun allPermutations(numList: List<Int>) {
 		if (DEBUG) {
 			check(numList)
 			return
@@ -58,6 +56,6 @@ class PermutationTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("failedTests")
-	fun runFailed(numList: List<Int>) = runAll(numList)
+	@MethodSource("failedPermutation")
+	fun verifyFailedPermTest(numList: List<Int>) = allPermutations(numList)
 }
