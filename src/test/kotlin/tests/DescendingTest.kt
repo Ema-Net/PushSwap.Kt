@@ -1,10 +1,8 @@
 package tests
 
-import Checker
-import Settings.DEBUG
-import Utils.suppressAllOutput
+import Utils.generalCheck
+import Utils.generalTest
 import me.emaryllis.chunk.ChunkSort
-import me.emaryllis.data.Move
 import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -28,21 +26,10 @@ class DescendingTest {
 		}
 	}
 
-	private fun check(numList: List<Int>): Pair<Boolean, List<Move>> {
-		val moves = chunkSort.chunkSort(numList)
-		val status = Checker(moves, numList, numList.sorted()).boolOutput()
-		return Pair(status, moves)
-	}
-
 	@ParameterizedTest
 	@MethodSource("descendingTest")
 	fun descendingTest(numList: List<Int>) {
 		Assumptions.assumeFalse(failed.get())
-		if (DEBUG) {
-			check(numList)
-			return
-		}
-		val moves = suppressAllOutput(::check, numList).second
-		println("Solved $numList in ${moves.size} moves: $moves.")
+		generalTest({ generalCheck(chunkSort, it) }, numList)
 	}
 }

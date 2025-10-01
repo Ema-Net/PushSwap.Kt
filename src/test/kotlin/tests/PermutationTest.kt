@@ -1,12 +1,10 @@
 package tests
 
-import Checker
-import Settings.DEBUG
+import Utils.generalCheck
+import Utils.generalTest
 import Utils.nthPermutation
 import Utils.permutations
-import Utils.suppressAllOutput
 import me.emaryllis.chunk.ChunkSort
-import me.emaryllis.data.Move
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -25,10 +23,10 @@ class PermutationTest {
 		)
 
 		@JvmStatic
-		fun allPermutations(): Stream<Arguments> = generatePermutations()
+		fun allPermutations(): Stream<Arguments> = generatePermutations((1..5040).toList())
 
 		private fun generatePermutations(tests: List<Int> = emptyList()): Stream<Arguments> {
-			val size = 7
+			val size = 14
 			val baseList = (1..size).toList()
 			return if (tests.isEmpty()) {
 				baseList.permutations().map { Arguments.of(it) }.asStream()
@@ -38,24 +36,11 @@ class PermutationTest {
 		}
 	}
 
-	private fun check(numList: List<Int>): Pair<Boolean, List<Move>> {
-		val moves = chunkSort.chunkSort(numList)
-		val status = Checker(moves, numList, numList.sorted()).boolOutput()
-		return Pair(status, moves)
-	}
-
 	@ParameterizedTest
 	@MethodSource("allPermutations")
-	fun allPermutations(numList: List<Int>) {
-		if (DEBUG) {
-			check(numList)
-			return
-		}
-		val moves = suppressAllOutput(::check, numList).second
-		println("Solved $numList in ${moves.size} moves: $moves.")
-	}
+	fun allPermutations(numList: List<Int>) = generalTest({ generalCheck(chunkSort, it) }, numList)
 
 	@ParameterizedTest
 	@MethodSource("failedPermutation")
-	fun verifyFailedPermTest(numList: List<Int>) = allPermutations(numList)
+	fun failedPermutations(numList: List<Int>) = allPermutations(numList)
 }

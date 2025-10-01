@@ -5,7 +5,24 @@ import me.emaryllis.data.Move
 import me.emaryllis.data.Stack
 import me.emaryllis.utils.Utils.sorted
 
+/**
+ * SmallSort provides optimal or near-optimal sorting for stacks of size 5 or less.
+ * Purpose: Efficiently sorts very small stacks using hardcoded strategies, minimizing moves.
+ *
+ * Time & Space Complexity: See [smallSort]
+ */
 class SmallSort {
+	/**
+	 * Sorts a stack of up to 5 elements using minimal [Move].
+	 * - If already sorted, returns an empty list.
+	 * - For 2 or 3 elements, uses sortThree.
+	 * - For 4 or 5 elements, uses sortFourFive.
+	 *
+	 * Time complexity: O(1) (constant number of cases).
+	 * Space complexity: O(k), k = number of moves returned.
+	 *
+	 * @return List of moves to sort the stack.
+	 */
 	fun smallSort(stack: Stack): List<Move> {
 		if (stack.a == stack.a.sorted()) return emptyList()
 		return when (stack.a.size) {
@@ -16,6 +33,18 @@ class SmallSort {
 		}
 	}
 
+	/**
+	 * Sorts a buffer of 2 or 3 elements using hardcoded [Move] sequences.
+	 * Purpose: Returns the minimal sequence of moves to sort the buffer.
+	 * - For 2 elements, swaps if needed.
+	 * - For 3 elements, uses case analysis for all possible orderings.
+	 *
+	 * Time complexity: O(1) (fixed number of cases).
+	 *
+	 * Space complexity: O(k), k = number of moves
+	 *
+	 * @return List of moves to sort the buffer. (0-2 moves)
+	 */
 	private fun sortThree(buffer: CircularBuffer): List<Move> {
 		if (buffer == buffer.sorted() || buffer.size < 2) return emptyList()
 		if (buffer.size == 2) {
@@ -38,8 +67,15 @@ class SmallSort {
 	}
 
 	/**
-	 * Sorts a stack of four or five elements by pushing the smallest one or two to stack B.
-	 * Computes 1-2 moves more than A*, but at a reduced time complexity.
+	 * It pushes the smallest elements to B, sorts the remaining 3
+	 * elements using [sortThree], and restores the pushed elements
+	 * to A. May use 1-2 more moves than A*, but is much faster.
+	 *
+	 * Time complexity: O(1) (fixed number of cases and moves).
+	 *
+	 * Space complexity: O(k), k = number of moves returned.
+	 *
+	 * @return List of moves to sort the stack.
 	 */
 	private fun sortFourFive(stack: Stack): List<Move> {
 		val numToPush = if (stack.a.size == 5) 2 else 1

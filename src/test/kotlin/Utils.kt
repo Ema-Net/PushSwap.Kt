@@ -1,5 +1,9 @@
+import Settings.DEBUG
+import me.emaryllis.chunk.ChunkSort
+import me.emaryllis.data.Move
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
+import kotlin.test.assertTrue
 
 object Utils {
 	fun String.showNewline() = this.replace("\n", "\\n")
@@ -39,5 +43,17 @@ object Utils {
 			System.setOut(originalOut)
 			System.setErr(originalErr)
 		}
+	}
+
+	fun generalCheck(chunkSort: ChunkSort, numList: List<Int>): Pair<Boolean, List<Move>> {
+		val moves = chunkSort.chunkSort(numList)
+		val status = Checker(moves, numList, numList.sorted()).boolOutput()
+		return Pair(status, moves)
+	}
+
+	fun generalTest(check: (List<Int>) -> Pair<Boolean, List<Move>>, numList: List<Int>) {
+		val (status, moves) = if (DEBUG) check(numList) else suppressAllOutput(check, numList)
+		assertTrue(status, "Failed to sort $numList with moves $moves.")
+		println("Solved $numList in ${moves.size} moves: $moves.")
 	}
 }

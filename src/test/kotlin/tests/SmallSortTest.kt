@@ -1,14 +1,13 @@
 package tests
 
 import Checker
-import Settings.DEBUG
+import Utils.generalTest
 import Utils.permutations
-import Utils.suppressAllOutput
 import me.emaryllis.chunk.SmallSort
 import me.emaryllis.data.Chunk
 import me.emaryllis.data.CircularBuffer
+import me.emaryllis.data.Move
 import me.emaryllis.data.Stack
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -26,21 +25,22 @@ class SmallSortTest {
 			.stream()
 	}
 
-	private fun check(numList: List<Int>) {
+	private fun check(numList: List<Int>): Pair<Boolean, List<Move>> {
 		val stack = Stack(
 			CircularBuffer(numList.size, numList),
 			CircularBuffer(numList.size),
 			Chunk(0, 0, emptyList()),
 			null
 		)
-		assertTrue(Checker(smallSort.smallSort(stack), numList, numList.sorted()).boolOutput())
+		val moves = smallSort.smallSort(stack)
+		val status = Checker(moves, numList, numList.sorted()).boolOutput()
+		return Pair(status, moves)
 	}
 
 	@ParameterizedTest
 	@MethodSource("smallSort")
 	fun smallSort(numList: List<Int>) {
-		if (DEBUG) return check(numList)
-		suppressAllOutput(::check, numList)
+		generalTest({ check(it) }, numList)
 	}
 
 	@Test
